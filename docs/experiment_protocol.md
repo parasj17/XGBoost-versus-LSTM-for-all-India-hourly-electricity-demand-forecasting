@@ -75,7 +75,11 @@ Anything changed after results were seen is appended here with date, reason, and
 
 | Date | Deviation | Reason | Effect |
 |---|---|---|---|
-| – | none yet | | |
+| 2026-10-14 | Degree-hours (CDD/HDD) are **not** used for XGBoost | Trees learn temperature thresholds themselves; avoids choosing a base temperature | Pre-results clarification; may be added for the LSTM/ridge |
+| 2026-10-14 | Hyper-parameter search (30 random trials per horizon) is run once on the headline set S4_full_A with the ratio target; the ablation over S0-S5 and the absolute-target variant reuse those hyper-parameters (3 seeds) | Keeps the ablation at a fixed model budget (section 8) and the search affordable | Pre-results clarification; the absolute-target variant is therefore not separately tuned |
+| 2026-10-14 | The ratio target is trained as 100 x (ratio - 1) | Same target on a scale where gamma/lambda ranges are meaningful; the first smoke run (2 trials, one horizon) showed identical results for all feature sets because the penalties blocked every split | Smoke-test only, no real results had been produced |
+| 2026-10-14 | `night_T` removed from the feature set | It was derived from future ERA5 radiation, which a strict leakage test must flag; hour and day of year carry the same information | Pre-results |
+| 2026-10-14 | XGBoost training rows = the same valid samples as the baselines; early stopping rounds 40, at most 1,500 trees | Same samples for all models (section 3) | Pre-results |
 
 ## 14. Gate 3 checklist (must all be true before any model training)
 - [x] Canonical dataset built and documented

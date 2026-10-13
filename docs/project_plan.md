@@ -97,7 +97,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | 3.2 | Build national weather: region mean → weighted national mean; also keep 5 regional temperature columns | M | `[x]` equal-weight baseline built (D-03) |
 | 3.3 | Derived weather features: CDD/HDD (base temperature chosen on **training data only**), heat index/apparent temperature, temperature lags | M | `[ ]` deliberately left to the modelling feature pipeline (parameters must be fit on training data only) |
 | 3.4 | Align weather timestamps with demand snapshots; handle the preceding-hour (precipitation, radiation) vs instant offset deliberately (D-09) | S | `[x]` no shift needed (D-09) |
-| 3.5 | Rebuild calendar features for the final range; add festival-window features (days to/from major festivals) | S | `[~]` calendar rebuilt for the final range; festival-window features not yet added |
+| 3.5 | Rebuild calendar features for the final range; add festival-window features (days to/from major festivals) | S | `[x]` festival/holiday windows (days to next / since last) added in `features_tabular.py` group g2 |
 | 3.6 | Merge into the canonical dataset; update the data dictionary (every column, unit, source, known-at-forecast-time flag) | M | `[~]` merged: `data/processed/india_hourly_canonical.csv` (33,432 × 43), log in `reports/canonical_dataset_log.md`; dictionary updated |
 | 3.7 | Sensitivity: equal vs population vs consumption weights; national mean vs regional columns | M | `[x]` weights in `reports/weather_weights.md`; ridge validation MAE changes by at most 41 MW (`reports/sensitivity_summary.md`) — the choice of weights does not matter at this level. National-mean vs regional temperature columns remains to be tested with XGBoost |
 
@@ -133,7 +133,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 | # | Task | Size | Status |
 |---|---|---|---|
-| 6.1 | Feature pipeline with leakage tests (unit test: shifting a future value changes nothing for rows ≤ t) | L | `[ ]` |
+| 6.1 | Feature pipeline with leakage tests (unit test: perturbing every measurement after the origin changes no earlier feature row) | L | `[x]` `scripts/features_tabular.py`, `tests/test_leakage.py` (0 changed rows over 3 origins x 4 horizons x 2 formulations; leaky canary detected) |
 | 6.2 | Direct models per horizon (1, 6, 24, 48 h), chronological early stopping on validation | M | `[ ]` |
 | 6.3 | Limited, documented hyper-parameter search on validation (equal budget with LSTM) | M | `[ ]` |
 | 6.4 | Ablations: G0 → +G1 → +G2 → +G3 (scenarios A and B) → +G4 | L | `[ ]` |
