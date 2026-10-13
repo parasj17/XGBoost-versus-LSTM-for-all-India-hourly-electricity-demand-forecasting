@@ -34,7 +34,7 @@ Legend: `[x]` done · `[ ]` to do · `[~]` partly done (the row says what remain
 | Zenodo daily state data | `[x]` 42 files, MD5-verified; used to validate Mendeley (r = 0.997); separate daily study optional |
 | Literature | `[x]` 8 papers recorded and DOIs checked; novelty search still pending |
 | Cleaning / canonical dataset | `[~]` demand/solar/wind cleaned (`india_hourly_demand_clean.csv`); weather/calendar merge pending |
-| Baselines / models | `[~]` baselines done on validation (Phase 5); XGBoost/LSTM not started |
+| Baselines / models | `[~]` baselines (Phase 5) and XGBoost (Phase 6) done on validation; LSTM not started; test set untouched |
 
 ---
 
@@ -134,11 +134,11 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | # | Task | Size | Status |
 |---|---|---|---|
 | 6.1 | Feature pipeline with leakage tests (unit test: perturbing every measurement after the origin changes no earlier feature row) | L | `[x]` `scripts/features_tabular.py`, `tests/test_leakage.py` (0 changed rows over 3 origins x 4 horizons x 2 formulations; leaky canary detected) |
-| 6.2 | Direct models per horizon (1, 6, 24, 48 h), chronological early stopping on validation | M | `[ ]` |
-| 6.3 | Limited, documented hyper-parameter search on validation (equal budget with LSTM) | M | `[ ]` |
-| 6.4 | Ablations: G0 → +G1 → +G2 → +G3 (scenarios A and B) → +G4 | L | `[ ]` |
-| 6.5 | Feature importance / SHAP for interpretation (training or validation data) | M | `[ ]` |
-| 6.6 | Log training/inference time, memory, hardware | S | `[ ]` |
+| 6.2 | Direct models per horizon (1, 6, 24, 48 h), chronological early stopping on validation | M | `[x]` ratio target (primary) and absolute (sensitivity), 3 seeds |
+| 6.3 | Limited, documented hyper-parameter search on validation (equal budget with LSTM) | M | `[x]` 30 random trials per horizon (best trial indices and timings in `reports/tables/xgboost_validation.md`). Some tuned values sit at the edge of the search ranges (max_depth 3 at 1 h and 48 h; gamma near 5 at 24 h), so the search is coarse |
+| 6.4 | Ablations: G0 → +G1 → +G2 → +G3 (scenarios A and B) → +G4 | L | `[x]` S0..S5, both formulations; see `reports/tables/xgboost_validation.md` |
+| 6.5 | Feature importance / SHAP for interpretation (validation data) | M | `[x]` `reports/xgboost_feature_importance.md` (built-in TreeSHAP) |
+| 6.6 | Log training/inference time, memory, hardware | S | `[x]` in `reports/tables/xgboost_validation.jsonl` (28.5 min total run; per-fit training 4-15 s, 0.5-1.6 MB models, 400 MB peak working set, 13 ms single-row latency dominated by Python overhead) |
 
 ## 9. Phase 7 — LSTM
 
@@ -223,10 +223,11 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 ## 15. Next actions (always keep this list short and current)
 
-1. Gate 4 is met (baselines reproducible and logged; D-07 frozen). Start **XGBoost** (Phase 6): feature pipeline with a leakage unit test (6.1), direct models per horizon in the relative formulation (6.2), limited tuning on validation (6.3).
-2. Keep the "must beat" bar from the validation results below in view; compare on the same valid samples.
-3. Optional now/later: hourly-mean sensitivity target (2.6).
+1. Phase 7 — LSTM: install PyTorch (124 MB wheel, CPU only), build windowed sequences without cross-split leakage, same valid samples, same 30-trial budget, 3 seeds, same ablation structure where feasible.
+2. Before the final test evaluation: decide the model set to freeze (XGBoost configuration is already tuned per horizon) and re-read the protocol checklist (section 13 deviations, section 14).
+3. Optional: improve the XGBoost search (several tuned values sit at the range edges) — must be done before looking at the test set, and logged.
 
-**Validation "must beat" (MAE in MW, best ridge variant per horizon; scenario A):** 1 h: 1,089 (naive best 4,430); 6 h: 2,941 (naive best 4,931); 24 h: 3,763 (naive best 4,931); 48 h: 4,663 (naive best 6,187). Past weather/solar/wind improve ridge by only about 0-2% over history+calendar at these horizons.
+**XGBoost validation results, headline model (S4_full_A, ratio target, scenario A, mean of 3 seeds):** MAE 1 h: 1,104 MW (best ridge 1,089; difference +15, CI -14 to +44); 6 h: 2,541 (ridge 2,941; -400, CI -507 to -259); 24 h: 3,174 (ridge 3,763; -589, CI -772 to -447); 48 h: 4,247 (ridge 4,663; -416, CI -678 to -87). Best naive: 4,430 / 4,931 / 4,931 / 6,187.
+**Ablation findings (validation):** the anchor-relative target is far better than absolute MW for trees (e.g. 1 h history-only 1,121 vs 1,605 MW). Calendar features add a lot (24 h: 3,840 → 3,312 with S1). Holiday features give no measurable gain on validation (Jan-Jun 2024 contains few major festivals; Diwali is not in the validation period, so this question stays open until the test period). Past weather and solar/wind help at 24 h and 48 h (about -4% to -5% MAE relative to S2) but slightly hurt at 1 h and 6 h. Oracle weather at t+h adds only about 1% at 24 h and 5.6% at 48 h, which bounds the value of a perfect weather forecast. Caution: `solar_roll24_mean` is a top feature at 24/48 h and may partly act as a time/capacity-growth proxy.
 
-Done recently: baselines on validation and D-07 frozen (2026-10-14); `git init` + first commit; training-period EDA (4.2); matplotlib; 1.4, 1.5, 1.8, Phases 2-3, protocol.
+Done recently: Phase 6 XGBoost (2026-10-14); baselines and D-07; EDA; sensitivity analyses (weights immaterial, target definition matters); leakage test.
