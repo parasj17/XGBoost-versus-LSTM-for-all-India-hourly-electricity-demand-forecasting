@@ -34,7 +34,7 @@ Legend: `[x]` done · `[ ]` to do · `[~]` partly done (the row says what remain
 | Zenodo daily state data | `[x]` 42 files, MD5-verified; used to validate Mendeley (r = 0.997); separate daily study optional |
 | Literature | `[x]` 8 papers recorded and DOIs checked; novelty search still pending |
 | Cleaning / canonical dataset | `[~]` demand/solar/wind cleaned (`india_hourly_demand_clean.csv`); weather/calendar merge pending |
-| Baselines / models | `[~]` baselines (Phase 5) and XGBoost (Phase 6) done on validation; LSTM not started; test set untouched |
+| Baselines / models | `[x]` baselines (Phase 5), XGBoost (Phase 6) and LSTM (Phase 7) done on validation; test set untouched |
 
 ---
 
@@ -144,11 +144,11 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 | # | Task | Size | Status |
 |---|---|---|---|
-| 7.1 | Sequence windowing with no cross-split leakage; scalers fit on train only | L | `[ ]` |
-| 7.2 | Architecture kept modest (one or two LSTM layers; single-output direct per horizon first; multi-output later if time) | M | `[ ]` |
-| 7.3 | Limited hyper-parameter search with the same budget as XGBoost; multiple seeds (≥ 3) | L | `[ ]` |
-| 7.4 | Same ablations as 6.4 | L | `[ ]` |
-| 7.5 | Log training/inference time, memory, parameters, hardware | S | `[ ]` |
+| 7.1 | Sequence windowing with no cross-split leakage; scalers fit on train only | L | `[x]` `scripts/run_lstm.py` (168-step windows gathered on the fly; level channels standardised with training statistics; same valid samples as XGBoost, asserted) |
+| 7.2 | Architecture kept modest (one LSTM layer + small MLP head; single-output direct per horizon) | M | `[x]` hidden 32-64, 10-27 thousand parameters |
+| 7.3 | Limited hyper-parameter search with the same budget as XGBoost; multiple seeds (>= 3) | L | `[~]` 3 seeds done; budget NOT equal: 12 trials per horizon vs 30 for XGBoost (documented pre-results in the protocol deviation log); tuning cost reported instead |
+| 7.4 | Same ablations as 6.4 | L | `[~]` L1 (history+calendar), L2 (+holidays), L4 (full, scenario A) done; oracle-weather scenario and group-wise ablation of weather vs solar/wind not run for the LSTM |
+| 7.5 | Log training/inference time, memory, parameters, hardware | S | `[x]` `reports/tables/lstm_validation.jsonl`; summary in `reports/validation_summary.md` |
 
 ## 10. Phase 8 — Comparison and robustness
 
@@ -223,11 +223,11 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 ## 15. Next actions (always keep this list short and current)
 
-1. Phase 7 — LSTM: install PyTorch (124 MB wheel, CPU only), build windowed sequences without cross-split leakage, same valid samples, same 30-trial budget, 3 seeds, same ablation structure where feasible.
-2. Before the final test evaluation: decide the model set to freeze (XGBoost configuration is already tuned per horizon) and re-read the protocol checklist (section 13 deviations, section 14).
-3. Optional: improve the XGBoost search (several tuned values sit at the range edges) — must be done before looking at the test set, and logged.
+1. **Owner decision before the test run:** which model configurations are frozen for the one-time test evaluation (and whether to spend more tuning effort first). The consolidated validation picture is in `reports/validation_summary.md`.
+2. Optional before the test run (must be logged as pre-test changes): widen the XGBoost search ranges that hit their edges; give the LSTM its own tuning for the history+calendar set; test the capacity-growth hypothesis for the LSTM weather/generation inputs.
+3. Final test evaluation (task 8.1) — once, all models, all horizons, headline configurations declared in advance.
+4. Then: error breakdowns (8.2), significance (8.3), rolling-origin stability (8.4), robustness (8.5), answers to the sub-questions (8.6); optional uncertainty extension (9.1); novelty search and writing (Phase 10).
 
-**XGBoost validation results, headline model (S4_full_A, ratio target, scenario A, mean of 3 seeds):** MAE 1 h: 1,104 MW (best ridge 1,089; difference +15, CI -14 to +44); 6 h: 2,541 (ridge 2,941; -400, CI -507 to -259); 24 h: 3,174 (ridge 3,763; -589, CI -772 to -447); 48 h: 4,247 (ridge 4,663; -416, CI -678 to -87). Best naive: 4,430 / 4,931 / 4,931 / 6,187.
-**Ablation findings (validation):** the anchor-relative target is far better than absolute MW for trees (e.g. 1 h history-only 1,121 vs 1,605 MW). Calendar features add a lot (24 h: 3,840 → 3,312 with S1). Holiday features give no measurable gain on validation (Jan-Jun 2024 contains few major festivals; Diwali is not in the validation period, so this question stays open until the test period). Past weather and solar/wind help at 24 h and 48 h (about -4% to -5% MAE relative to S2) but slightly hurt at 1 h and 6 h. Oracle weather at t+h adds only about 1% at 24 h and 5.6% at 48 h, which bounds the value of a perfect weather forecast. Caution: `solar_roll24_mean` is a top feature at 24/48 h and may partly act as a time/capacity-growth proxy.
+**Validation results (MAE, MW; details and intervals in `reports/validation_summary.md`):** best naive 4,430 / 4,931 / 4,931 / 6,187; best ridge 1,089 / 2,941 / 3,763 / 4,663; XGBoost headline 1,104 / 2,541 / 3,174 / 4,247; LSTM full features 1,584 / 3,048 / 3,273 / 4,778; LSTM history+calendar 1,503 / 2,619 / 3,300 / 4,392 (horizons 1 / 6 / 24 / 48 h). XGBoost has the lowest point estimate from 6 h on; the LSTM history+calendar variant is statistically indistinguishable from it at 6, 24 and 48 h. Compute: LSTM tuning 53 min vs XGBoost 10 min; LSTM final fits 75 min vs 17 min.
 
-Done recently: Phase 6 XGBoost (2026-10-14); baselines and D-07; EDA; sensitivity analyses (weights immaterial, target definition matters); leakage test.
+Done recently: Phase 7 LSTM on validation (2026-10-14/15); Phase 6 XGBoost; baselines and D-07; EDA; sensitivity analyses; leakage test.
