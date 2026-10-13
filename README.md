@@ -17,7 +17,7 @@ data/raw/zenodo_state_daily/     Zenodo 14983362 daily state energy + weather (4
 data/interim/                    audit outputs, parse cache (regenerable)
 data/processed/                  calendar features (canonical dataset not built yet)
 reports/                         inventory, audit, data dictionary, acquisition plan
-scripts/                         inspect_electricity_data.py, build_hourly_dataset.py, build_canonical_dataset.py, plot_cleaning_check.py, inspect_weather_data.py, build_calendar_features.py,
+scripts/                         inspect_electricity_data.py, build_hourly_dataset.py, build_canonical_dataset.py, plot_cleaning_check.py, eda_training_period.py, run_baselines.py, inspect_weather_data.py, build_calendar_features.py,
                                  download_zenodo_state_daily.py
 references.md                    all external sources and literature
 docs/                            literature review, research gap and methodology context

@@ -34,7 +34,7 @@ Legend: `[x]` done · `[ ]` to do · `[~]` partly done (the row says what remain
 | Zenodo daily state data | `[x]` 42 files, MD5-verified; used to validate Mendeley (r = 0.997); separate daily study optional |
 | Literature | `[x]` 8 papers recorded and DOIs checked; novelty search still pending |
 | Cleaning / canonical dataset | `[~]` demand/solar/wind cleaned (`india_hourly_demand_clean.csv`); weather/calendar merge pending |
-| Baselines / models | `[ ]` not started (by design) |
+| Baselines / models | `[~]` baselines done on validation (Phase 5); XGBoost/LSTM not started |
 
 ---
 
@@ -120,10 +120,10 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 | # | Task | Size | Status |
 |---|---|---|---|
-| 5.1 | Persistence, seasonal-naive 24 h and 168 h, "same hour last week + level adjustment" | S | `[ ]` |
-| 5.2 | Ridge / linear model with calendar + lags | S | `[ ]` |
-| 5.3 | Evaluate all baselines on validation (and test only at final reporting) per horizon | S | `[ ]` |
-| 5.4 | Establish the "must beat" table and error by hour/season | S | `[ ]` |
+| 5.1 | Persistence, seasonal-naive 24 h and 168 h | S | `[x]` |
+| 5.2 | Ridge / linear model with calendar + lags (+ full variant with holidays, past weather, past solar/wind) | S | `[x]` 4 variants (abs/rel x history/full) |
+| 5.3 | Evaluate all baselines on validation (test is never loaded) per horizon | S | `[x]` `reports/tables/baselines_validation.md` + `.jsonl` (commit, dataset hash, timings) |
+| 5.4 | Establish the "must beat" table and error by season/peak | S | `[x]` see below; the bar for XGBoost/LSTM is the best ridge, not the naive baselines |
 
 **GATE 4:** baselines reproducible and logged. Only now can model training start.
 
@@ -194,7 +194,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | D-04 | Train/validation/test boundaries | **Frozen 2026-10-13 (approved by owner)** | Train targets 2021-09-01 → 2023-12-31; validation 2024-01-01 → 2024-06-30; test 2024-07-01 → 2025-06-24 (touched once). See `docs/experiment_protocol.md` |
 | D-05 | Cleaning thresholds: 80–260 GW bounds, 15 % jump + return rule, 10 % isolated-point rule, ≤ 3 h interpolation | **Frozen 2026-10-13** | Set from physical plausibility and hour-to-hour deviation statistics of the whole series, which includes the future validation/test years (no forecast performance used). Disclose this in the write-up; a robustness run with the rules applied only on training-period statistics can be added |
 | D-06 | Horizon definition | **Decided 2026-10-13 (approved by owner)** | Direct single-target forecast of demand at t+h, one model per horizon, h ∈ {1, 6, 24, 48} |
-| D-07 | Trend handling (absolute demand vs ratio/difference to a lag) | **Recommendation recorded 2026-10-13; final choice on validation in Phase 5** | Training-period EDA: full-year mean +7.8% (2022→2023), monthly YoY from −1% to +22% (weather-driven), strong weekly/daily seasonality. Primary candidate: target relative to the seasonal anchor; comparison variant: absolute MW. Both are run; the choice is frozen using validation results only. **Decision rule fixed in advance (2026-10-14, before any baseline was run):** choose the anchor-relative target if its mean validation MAE over the four horizons (ridge model, same samples) is lower than that of absolute MW; otherwise absolute MW. The block-bootstrap interval of the difference is reported either way |
+| D-07 | Trend handling | **Frozen 2026-10-14** | By the rule fixed in advance: mean validation MAE over the four horizons, ridge on identical samples: relative-to-24h-anchor 3,132 MW vs absolute 3,226 MW (history+calendar model) and 3,122 vs 3,192 MW (full model). The relative target is clearly better at 24 h and 48 h (block-bootstrap CI of the paired difference excludes 0) and equal or marginally worse at 1 h (+4 MW) and 6 h. **Primary formulation: target and demand features relative to the seasonal anchor; absolute MW remains a reported sensitivity variant.** Caveat: decided with a linear model; XGBoost/LSTM results will be reported for both |
 | D-08 | Include regional/state festivals | **Deferred 2026-10-13** | Core model uses the 85 verified central holidays only; regional festivals become optional extension 9.3 after the main results exist |
 | D-09 | Handling of preceding-hour weather vs instant demand | **Decided 2026-10-13** | No shift. Precipitation and radiation are preceding-hour aggregates that end at their label, so they are fully known at that label, the same instant as the demand snapshot |
 | D-10 | Whether to use solar/wind past values (G4) | **Open** | Past values only; actual future values never |
@@ -223,7 +223,10 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 ## 15. Next actions (always keep this list short and current)
 
-1. Implement the baselines (Phase 5) on the validation period, log them, and use them to freeze D-07 (the last open Gate 3 items).
-2. Optional now/later: hourly-mean sensitivity target (2.6).
+1. Gate 4 is met (baselines reproducible and logged; D-07 frozen). Start **XGBoost** (Phase 6): feature pipeline with a leakage unit test (6.1), direct models per horizon in the relative formulation (6.2), limited tuning on validation (6.3).
+2. Keep the "must beat" bar from the validation results below in view; compare on the same valid samples.
+3. Optional now/later: hourly-mean sensitivity target (2.6).
 
-Done recently: `git init` + first commit f2a56f3 (2026-10-14); training-period EDA (4.2); matplotlib installed and cleaning figure made (2.5); 1.4 weather units; 1.5 holidays verified; 1.8 forecast-weather availability; Phase 2 cleaning; Phase 3 canonical dataset; 4.1 experiment protocol (2026-10-13).
+**Validation "must beat" (MAE in MW, best ridge variant per horizon; scenario A):** 1 h: 1,089 (naive best 4,430); 6 h: 2,941 (naive best 4,931); 24 h: 3,763 (naive best 4,931); 48 h: 4,663 (naive best 6,187). Past weather/solar/wind improve ridge by only about 0-2% over history+calendar at these horizons.
+
+Done recently: baselines on validation and D-07 frozen (2026-10-14); `git init` + first commit; training-period EDA (4.2); matplotlib; 1.4, 1.5, 1.8, Phases 2-3, protocol.

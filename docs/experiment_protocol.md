@@ -47,7 +47,7 @@ Features that describe cleaning (`demand_raw_mw`, `demand_quality_flag`, `demand
 5. Any model-design change after seeing test results is a post-hoc deviation.
 
 ## 6. Non-stationarity / trend (decision D-07 — still open)
-Candidate formulations: (a) predict absolute MW; (b) predict the ratio to the seasonal anchor (the anchor rule of section 4, G0). The training-period EDA (`reports/eda_training_period.md`) found a full-year mean growth of 7.8% (2022 to 2023), month-to-month year-over-year growth between −1% and +22%, and very strong 24 h / 168 h autocorrelation (0.96 / 0.90), which favours an anchor-relative target as the primary candidate. The choice is frozen using **validation** performance only; until then both are run and reported.
+Candidate formulations: (a) predict absolute MW; (b) predict the ratio to the seasonal anchor (the anchor rule of section 4, G0). The training-period EDA (`reports/eda_training_period.md`) found a full-year mean growth of 7.8% (2022 to 2023), month-to-month year-over-year growth between −1% and +22%, and very strong 24 h / 168 h autocorrelation (0.96 / 0.90), which favours an anchor-relative target as the primary candidate. **Frozen 2026-10-14:** the rule fixed in advance (lower mean validation MAE over the four horizons, ridge on identical samples) selected the anchor-relative target (3,132 vs 3,226 MW; full model 3,122 vs 3,192 MW). Primary formulation = relative to the anchor; absolute MW is still run as a sensitivity variant.
 
 ## 7. Metrics
 Per horizon, on the same valid samples: MAE (MW), RMSE (MW), MAPE (%), WAPE = Σ|e| / Σ|y| (%), and R² (supplementary only). Breakdowns: season (IMD-style), hour of day, weekday vs weekend vs holiday, ±1 day around major festivals, and **peak hours** (hours whose demand is at or above the 95th percentile of the *training* demand). Skill relative to the best baseline: 1 − MAE_model / MAE_baseline.
@@ -83,6 +83,6 @@ Anything changed after results were seen is appended here with date, reason, and
 - [x] Task and horizons defined (section 1)
 - [x] Feature groups and allowed information defined (section 4)
 - [x] Metrics, comparison procedure and logging defined
-- [~] D-07 trend formulation: EDA done, recommendation recorded; final choice needs validation results from the baselines
-- [ ] Baselines implemented and logged (Phase 5)
+- [x] D-07 trend formulation frozen (relative to anchor)
+- [x] Baselines implemented and logged (Phase 5): `reports/tables/baselines_validation.md`
 - [x] `git init` done (2026-10-14; first commit f2a56f3; record the commit hash in every run log)
