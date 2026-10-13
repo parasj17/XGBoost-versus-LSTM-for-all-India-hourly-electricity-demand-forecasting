@@ -88,7 +88,7 @@ For the 5-min and 10-s regimes there are two options:
 - **Snapshot at HH:00** — matches what the authors do ([I], `Sheet2`) and presumably what the layout-B file contains.
 - **Hourly mean** — physically a better energy-type measure but more exposed to outages/spikes.
 
-Measured on 2021-09 → 2023-12 (valid values only), the HH:00 snapshot differs from the hourly mean by **MAE 2,120 MW (1.2 % of mean demand), 99th percentile 8,420 MW**. That is not negligible relative to 1-hour-ahead forecast errors of ~1–3 %. **[U]** Whether the layout-B hourly value is a snapshot or a mean is unknown (there is no overlapping period to test it).
+Measured on 2021-09 → 2023-12 (valid values only), the HH:00 snapshot differs from the hourly mean by **MAE 2,120 MW (1.2 % of mean demand), 99th percentile 8,420 MW**. That is not negligible relative to 1-hour-ahead forecast errors of ~1–3 %. **[U → I]** Whether the layout-B hourly value is a snapshot or a mean cannot be tested directly (no overlapping period). Indirect evidence (2026-10-14): a ridge model trained on 2021-23 hourly means and scored on the 2024 values is about 2.3 times worse at 1 h (MAE 2,570 vs 1,095 MW) than the same model trained on snapshots, so the 2024-25 values behave like HH:00 snapshots.
 
 **Recommendation:** use the HH:00 snapshot as the primary target (consistent across regimes and with the only hourly source), and run a sensitivity check with hourly means for 2021–2023, reporting the difference.
 

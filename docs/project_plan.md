@@ -63,7 +63,7 @@ Legend: `[x]` done · `[ ]` to do · `[~]` partly done (the row says what remain
 | 1.4 | Record weather units in the dictionary (wind in **km/h**, GHI W/m² preceding-hour mean, precipitation mm preceding hour, T in °C) and fix the wind-speed column name | S | `[x]` done 2026-10-13, units verified from the API |
 | 1.5 | Verify holiday CSV against the official DoPT memoranda | S | `[x]` done 2026-10-13: all 5 years (85 rows) compared with Annexure-I of the DoPT OMs; 0 differences. 2023 from the official doptcirculars.nic.in PDF; 2021/2022/2024/2025 from scanned OM PDFs hosted on staffnews.in |
 | 1.6 | Decide on regional/state festivals (see D-08); if yes, collect with citations | M | `[ ]` |
-| 1.7 | Spot-check Zenodo per-state weather against Open-Meteo for one state and a few days (is it processed as we assume?) | S | `[ ]` optional |
+| 1.7 | Spot-check Zenodo per-state weather against Open-Meteo for one state and a few days | S | `[x]` 2026-10-14: Delhi daily mean temperature, 969 overlapping days: correlation 0.999, mean difference -0.19 C, MAE 0.31 C (0.22 C on a UTC day) — consistent with ERA5-derived data as assumed |
 | 1.8 | Investigate availability of **archived weather forecasts** for scenario C | M | `[x]` done 2026-10-13, see decision D-13 below |
 | 1.9 | Investigate any **solar/wind forecast** availability (otherwise G4 uses past values only) | S | `[ ]` |
 
@@ -81,8 +81,8 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | 2.2 | Write `scripts/build_hourly_dataset.py`: HH:00 snapshots from all 29 workbooks, drop footer rows, apply rules, add `demand_quality_flag` and `source_regime` | L | `[x]` output `data/processed/india_hourly_demand_clean.csv` |
 | 2.3 | Gap handling: interpolate ≤ 3 h only; longer gaps kept missing; decide how windows touching gaps are excluded from training/evaluation | M | `[~]` interpolation done (49 h); 12 h remain missing; the exclusion rule for windows goes in the experiment protocol |
 | 2.4 | Produce a cleaning log: hours affected per rule, per year | S | `[x]` `reports/cleaning_log.md` |
-| 2.5 | Plots before/after cleaning (demand, outages) saved to `reports/figures/` | S | `[x]` `reports/figures/cleaning_before_after.png` (solar night-baseline plot still to do with the EDA) |
-| 2.6 | Sensitivity file: hourly-mean target for 2021–2023 | M | `[ ]` |
+| 2.5 | Plots before/after cleaning (demand, outages) and the solar night baseline | S | `[x]` `reports/figures/cleaning_before_after.png`, `reports/figures/solar_night_baseline.png` |
+| 2.6 | Sensitivity file: hourly-mean target for 2021–2023 | M | `[x]` `data/interim/demand_hourmean_2021_2023.csv`, `reports/hourmean_sensitivity.md`; ridge result in `reports/sensitivity_summary.md` |
 | 2.7 | Unit tests / assertions: 33,432 rows, strictly hourly, no duplicate timestamps, no values outside bounds after cleaning | S | `[x]` assertions run inside the script |
 
 **GATE 2:** canonical demand/solar/wind file exists, passes assertions, and the cleaning log is reviewed by you.
@@ -99,7 +99,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | 3.4 | Align weather timestamps with demand snapshots; handle the preceding-hour (precipitation, radiation) vs instant offset deliberately (D-09) | S | `[x]` no shift needed (D-09) |
 | 3.5 | Rebuild calendar features for the final range; add festival-window features (days to/from major festivals) | S | `[~]` calendar rebuilt for the final range; festival-window features not yet added |
 | 3.6 | Merge into the canonical dataset; update the data dictionary (every column, unit, source, known-at-forecast-time flag) | M | `[~]` merged: `data/processed/india_hourly_canonical.csv` (33,432 × 43), log in `reports/canonical_dataset_log.md`; dictionary updated |
-| 3.7 | Sensitivity: equal vs population vs consumption weights; national mean vs regional columns | M | `[ ]` (run during Phase 6 ablations) |
+| 3.7 | Sensitivity: equal vs population vs consumption weights; national mean vs regional columns | M | `[x]` weights in `reports/weather_weights.md`; ridge validation MAE changes by at most 41 MW (`reports/sensitivity_summary.md`) — the choice of weights does not matter at this level. National-mean vs regional temperature columns remains to be tested with XGBoost |
 
 **GATE 3:** canonical dataset with all feature groups and dictionary complete; **splits frozen** (D-04); evaluation protocol written (Phase 4).
 
@@ -190,7 +190,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 |---|---|---|---|
 | D-01 | Target = all-India HH:00 demand snapshot (MW) | **Decided (working)** 2026-10-13 | Consistent across regimes; hourly-mean sensitivity planned |
 | D-02 | Weather locations = 12 cities across 5 grid regions | **Approved by owner** 2026-10-13 | Downloaded; city selection is a stated limitation |
-| D-03 | Aggregation weights for national weather | **Decided (working) 2026-10-13** | Baseline = equal weights over the 5 grid regions (region mean of its cities, then mean of regions). Population-/consumption-weighted versions are sensitivity analyses (3.7) and need a cited source before use; none is adopted without one |
+| D-03 | Aggregation weights for national weather | **Decided 2026-10-13; sensitivity done 2026-10-14: weights are immaterial for ridge validation error (<= 41 MW)** | Baseline = equal weights over the 5 grid regions (region mean of its cities, then mean of regions). Population-/consumption-weighted versions are sensitivity analyses (3.7) and need a cited source before use; none is adopted without one |
 | D-04 | Train/validation/test boundaries | **Frozen 2026-10-13 (approved by owner)** | Train targets 2021-09-01 → 2023-12-31; validation 2024-01-01 → 2024-06-30; test 2024-07-01 → 2025-06-24 (touched once). See `docs/experiment_protocol.md` |
 | D-05 | Cleaning thresholds: 80–260 GW bounds, 15 % jump + return rule, 10 % isolated-point rule, ≤ 3 h interpolation | **Frozen 2026-10-13** | Set from physical plausibility and hour-to-hour deviation statistics of the whole series, which includes the future validation/test years (no forecast performance used). Disclose this in the write-up; a robustness run with the rules applied only on training-period statistics can be added |
 | D-06 | Horizon definition | **Decided 2026-10-13 (approved by owner)** | Direct single-target forecast of demand at t+h, one model per horizon, h ∈ {1, 6, 24, 48} |
