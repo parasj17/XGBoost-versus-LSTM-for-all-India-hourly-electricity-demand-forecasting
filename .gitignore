@@ -1,0 +1,24 @@
+# Large raw data and generated artifacts
+data/raw/*
+!data/raw/calendar/
+data/interim/
+data/processed/
+*.zip
+*.xlsx
+*.csv.gz
+*.parquet
+*.npy
+*.pkl
+*.h5
+*.pt
+models/
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.ipynb_checkpoints/
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/

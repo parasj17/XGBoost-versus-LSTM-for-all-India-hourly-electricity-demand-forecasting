@@ -1,0 +1,230 @@
+# Project plan — India-wide electricity demand forecasting (XGBoost vs LSTM)
+
+**This is the living plan we work from.** Update the status boxes and the decision log whenever something is done or decided. Last updated: 2026-10-13.
+
+Related documents: `docs/literature_review_and_research_gap.md` (background and gap), `reports/` (audit, dictionary, acquisition plan), `references.md` (sources).
+
+Legend: `[x]` done · `[ ]` to do · `[~]` partly done (the row says what remains) · **GATE** = must pass before the next phase starts · size S ≈ an hour or two, M ≈ a day, L ≈ several days (rough, for an undergraduate working alone).
+
+---
+
+## 0. How we work (rules)
+
+1. **One phase at a time, in order.** Do not start a phase until the previous GATE is passed.
+2. **No model training before Gate 3** (clean dataset, frozen splits, baselines defined).
+3. **Never fabricate or fill data to look complete.** Every imputation or exclusion is counted and logged.
+4. **Raw files are immutable.** All processing reads raw and writes to `data/interim` or `data/processed`.
+5. **Chronological order only** — no random splits, no shuffling, no future information (see leakage rules in `reports/data_acquisition_plan.md` section 6).
+6. **Test period is touched once**, after all choices (features, hyper-parameters, thresholds) are frozen on train/validation.
+7. **Every claim is traceable**: a source in `references.md`, or a result file produced by a script that is committed.
+8. **No claims of model superiority** without measured results, baselines, and uncertainty on the difference.
+9. **Decisions go in the decision log (section 13)** with the reason and date, so they can be defended later.
+10. Scripts must be reusable, documented, runnable with one command from the project root, and use fixed random seeds.
+
+---
+
+## 1. Where we are (status snapshot)
+
+| Area | Status |
+|---|---|
+| Workspace and structure | `[x]` created, `.gitignore`, `requirements.txt`, README |
+| Electricity data (Mendeley) | `[x]` downloaded, extracted, fully audited — all-India series, 2021-09-01 → 2025-06-24, 33,432 hours, needs cleaning |
+| Weather (Open-Meteo ERA5) | `[x]` 12 cities downloaded, 33,432 rows each, 0 nulls; aggregated to national (equal-weight) in the canonical dataset |
+| Calendar/holidays | `[~]` time features built; 85 central gazetted holidays sourced from and verified against the DoPT memoranda (0 differences); regional festivals not collected |
+| Zenodo daily state data | `[x]` 42 files, MD5-verified; used to validate Mendeley (r = 0.997); separate daily study optional |
+| Literature | `[x]` 8 papers recorded and DOIs checked; novelty search still pending |
+| Cleaning / canonical dataset | `[~]` demand/solar/wind cleaned (`india_hourly_demand_clean.csv`); weather/calendar merge pending |
+| Baselines / models | `[ ]` not started (by design) |
+
+---
+
+## 2. Final research design in one page (current working version)
+
+- **Target:** all-India demand (MW), HH:00 snapshot, hourly, IST, 2021-09-01 00:00 → 2025-06-24 23:00. Sensitivity check with hourly means for the 2021–2023 period.
+- **Inputs (feature groups for ablation):** (G0) demand history (lags, rolling stats up to the forecast origin); (G1) calendar (hour, weekday, month, season, cyclical); (G2) holidays/festivals; (G3) weather (national aggregate of 12 ERA5 cities); (G4) solar/wind generation **up to the origin only**.
+- **Models:** baselines (persistence, seasonal-naive 24 h and 168 h, ridge) → XGBoost → LSTM. Same splits, features and metrics for all.
+- **Horizons:** 1, 6, 24, 48 hours (72 h only if justified). Each defined precisely as a single-target "direct" forecast of the value at t+h unless we decide otherwise (decision D-06).
+- **Splits (proposed, to be frozen):** train 2021-09-01 → 2023-12-31; validation 2024-01-01 → 2024-06-30; test 2024-07-01 → 2025-06-24. Plus rolling-origin check.
+- **Weather scenarios:** (A) no future weather, (B) oracle weather at t+h as an upper bound, (C) archived forecasts if available.
+- **Metrics:** MAE, RMSE, MAPE, WAPE (R² supplementary), per horizon and season/hour/holiday.
+- **Uncertainty (optional extension):** quantile regression and/or conformal intervals; PICP, width, pinball loss.
+- **Efficiency:** training/inference time, hardware, memory, parameters — logged for every run.
+- **Core vs optional** follows section 6 of the literature document. EV variables are out unless reliable data appears.
+
+---
+
+## 3. Phase 1 — Finish data acquisition and validation  *(mostly done)*
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 1.1 | Audit Mendeley workbooks (schema, period, gaps, quality) | L | `[x]` `reports/dataset_audit.md` |
+| 1.2 | Download 12-city ERA5 weather | S | `[x]` `data/raw/weather/` |
+| 1.3 | Validate weather files: time grid, ranges, units | S | `[x]` grid OK, ranges plausible |
+| 1.4 | Record weather units in the dictionary (wind in **km/h**, GHI W/m² preceding-hour mean, precipitation mm preceding hour, T in °C) and fix the wind-speed column name | S | `[x]` done 2026-10-13, units verified from the API |
+| 1.5 | Verify holiday CSV against the official DoPT memoranda | S | `[x]` done 2026-10-13: all 5 years (85 rows) compared with Annexure-I of the DoPT OMs; 0 differences. 2023 from the official doptcirculars.nic.in PDF; 2021/2022/2024/2025 from scanned OM PDFs hosted on staffnews.in |
+| 1.6 | Decide on regional/state festivals (see D-08); if yes, collect with citations | M | `[ ]` |
+| 1.7 | Spot-check Zenodo per-state weather against Open-Meteo for one state and a few days (is it processed as we assume?) | S | `[ ]` optional |
+| 1.8 | Investigate availability of **archived weather forecasts** for scenario C | M | `[x]` done 2026-10-13, see decision D-13 below |
+| 1.9 | Investigate any **solar/wind forecast** availability (otherwise G4 uses past values only) | S | `[ ]` |
+
+**GATE 1:** all raw sources documented in `reports/dataset_inventory.md` and `references.md`; the three open questions (1.4, 1.5, D-08) are resolved or consciously deferred.
+
+---
+
+## 4. Phase 2 — Cleaning and the canonical hourly dataset
+
+Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_dictionary.md`) built by one reproducible script with a cleaning log.
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 2.1 | Freeze cleaning rules (zeros → missing; plausibility bounds; dip-and-recovery; isolated-point; stuck values; solar clipping) | M | `[x]` frozen 2026-10-13, see data dictionary. Night-baseline correction deferred to Phase 3 |
+| 2.2 | Write `scripts/build_hourly_dataset.py`: HH:00 snapshots from all 29 workbooks, drop footer rows, apply rules, add `demand_quality_flag` and `source_regime` | L | `[x]` output `data/processed/india_hourly_demand_clean.csv` |
+| 2.3 | Gap handling: interpolate ≤ 3 h only; longer gaps kept missing; decide how windows touching gaps are excluded from training/evaluation | M | `[~]` interpolation done (49 h); 12 h remain missing; the exclusion rule for windows goes in the experiment protocol |
+| 2.4 | Produce a cleaning log: hours affected per rule, per year | S | `[x]` `reports/cleaning_log.md` |
+| 2.5 | Plots before/after cleaning (demand, outages) saved to `reports/figures/` | S | `[x]` `reports/figures/cleaning_before_after.png` (solar night-baseline plot still to do with the EDA) |
+| 2.6 | Sensitivity file: hourly-mean target for 2021–2023 | M | `[ ]` |
+| 2.7 | Unit tests / assertions: 33,432 rows, strictly hourly, no duplicate timestamps, no values outside bounds after cleaning | S | `[x]` assertions run inside the script |
+
+**GATE 2:** canonical demand/solar/wind file exists, passes assertions, and the cleaning log is reviewed by you.
+
+---
+
+## 5. Phase 3 — Weather aggregation and feature tables
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 3.1 | Choose aggregation weights and **document the source** (Census 2011 population per grid region, or regional electricity consumption from CEA/Grid-India); decision D-03 | M | `[ ]` |
+| 3.2 | Build national weather: region mean → weighted national mean; also keep 5 regional temperature columns | M | `[x]` equal-weight baseline built (D-03) |
+| 3.3 | Derived weather features: CDD/HDD (base temperature chosen on **training data only**), heat index/apparent temperature, temperature lags | M | `[ ]` deliberately left to the modelling feature pipeline (parameters must be fit on training data only) |
+| 3.4 | Align weather timestamps with demand snapshots; handle the preceding-hour (precipitation, radiation) vs instant offset deliberately (D-09) | S | `[x]` no shift needed (D-09) |
+| 3.5 | Rebuild calendar features for the final range; add festival-window features (days to/from major festivals) | S | `[~]` calendar rebuilt for the final range; festival-window features not yet added |
+| 3.6 | Merge into the canonical dataset; update the data dictionary (every column, unit, source, known-at-forecast-time flag) | M | `[~]` merged: `data/processed/india_hourly_canonical.csv` (33,432 × 43), log in `reports/canonical_dataset_log.md`; dictionary updated |
+| 3.7 | Sensitivity: equal vs population vs consumption weights; national mean vs regional columns | M | `[ ]` (run during Phase 6 ablations) |
+
+**GATE 3:** canonical dataset with all feature groups and dictionary complete; **splits frozen** (D-04); evaluation protocol written (Phase 4).
+
+---
+
+## 6. Phase 4 — Evaluation protocol and exploratory analysis (training period only)
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 4.1 | Write `docs/experiment_protocol.md`: exact horizons definition, splits, metrics formulas, scenarios A/B/C, baselines, ablation list, random seeds, logging schema | M | `[x]` written and frozen 2026-10-13 |
+| 4.2 | Exploratory analysis **on the training period only**: daily/weekly/annual profiles, trend/growth, temperature–demand curve, festival and holiday effects, autocorrelation, solar/wind relations | L | `[x]` `reports/eda_training_period.md` + `reports/figures/eda_training_period.png` (2026-10-13) |
+| 4.3 | Decide the treatment of trend/non-stationarity (levels vs ratios to lag; tree models cannot extrapolate beyond the training range) — D-07 | M | `[ ]` |
+| 4.4 | Build the experiment-logging utility (JSON/CSV: config, git state, seeds, hardware, timings) | M | `[ ]` |
+
+---
+
+## 7. Phase 5 — Baselines
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 5.1 | Persistence, seasonal-naive 24 h and 168 h, "same hour last week + level adjustment" | S | `[ ]` |
+| 5.2 | Ridge / linear model with calendar + lags | S | `[ ]` |
+| 5.3 | Evaluate all baselines on validation (and test only at final reporting) per horizon | S | `[ ]` |
+| 5.4 | Establish the "must beat" table and error by hour/season | S | `[ ]` |
+
+**GATE 4:** baselines reproducible and logged. Only now can model training start.
+
+---
+
+## 8. Phase 6 — XGBoost
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 6.1 | Feature pipeline with leakage tests (unit test: shifting a future value changes nothing for rows ≤ t) | L | `[ ]` |
+| 6.2 | Direct models per horizon (1, 6, 24, 48 h), chronological early stopping on validation | M | `[ ]` |
+| 6.3 | Limited, documented hyper-parameter search on validation (equal budget with LSTM) | M | `[ ]` |
+| 6.4 | Ablations: G0 → +G1 → +G2 → +G3 (scenarios A and B) → +G4 | L | `[ ]` |
+| 6.5 | Feature importance / SHAP for interpretation (training or validation data) | M | `[ ]` |
+| 6.6 | Log training/inference time, memory, hardware | S | `[ ]` |
+
+## 9. Phase 7 — LSTM
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 7.1 | Sequence windowing with no cross-split leakage; scalers fit on train only | L | `[ ]` |
+| 7.2 | Architecture kept modest (one or two LSTM layers; single-output direct per horizon first; multi-output later if time) | M | `[ ]` |
+| 7.3 | Limited hyper-parameter search with the same budget as XGBoost; multiple seeds (≥ 3) | L | `[ ]` |
+| 7.4 | Same ablations as 6.4 | L | `[ ]` |
+| 7.5 | Log training/inference time, memory, parameters, hardware | S | `[ ]` |
+
+## 10. Phase 8 — Comparison and robustness
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 8.1 | Final test evaluation (once), all models, all horizons | M | `[ ]` |
+| 8.2 | Error breakdowns: horizon, hour, season, holiday vs non-holiday, peaks, festival windows | M | `[ ]` |
+| 8.3 | Significance of differences (Diebold–Mariano or block bootstrap) | M | `[ ]` |
+| 8.4 | Rolling-origin stability check | M | `[ ]` |
+| 8.5 | Robustness: performance on the cleaned vs raw-flagged periods, the sampling-regime change, hourly-mean target sensitivity | M | `[ ]` |
+| 8.6 | Answer the sub-questions in the literature document (weather? festivals? horizons? solar/wind?) with evidence | M | `[ ]` |
+
+## 11. Phase 9 — Optional extensions (only if time permits)
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 9.1 | Uncertainty: XGBoost quantile regression and split/adaptive conformal intervals; LSTM quantile head or MC dropout; PICP, width, pinball loss | L | `[ ]` |
+| 9.2 | Daily regional study with Zenodo state data (regional forecasts → India total) as a separate experiment | L | `[ ]` |
+| 9.3 | Regional festivals / state holidays features | M | `[ ]` |
+| 9.4 | Gridded (population-weighted) weather alternative | M | `[ ]` |
+| 9.5 | Longer horizons (72 h, 168 h) | M | `[ ]` |
+| 9.6 | EV features — only if reliable historical data is found | – | `[ ]` likely excluded |
+
+## 12. Phase 10 — Novelty check and writing
+
+| # | Task | Size | Status |
+|---|---|---|---|
+| 10.1 | Broader literature search for national-scale Indian forecasting (ML/DL, weather, festivals); update the research gap honestly | L | `[ ]` (before any publication claim) |
+| 10.2 | Computational-efficiency table from the logs | S | `[ ]` |
+| 10.3 | Figures and tables generated by scripts, saved to `reports/figures/` and `reports/tables/` | M | `[ ]` |
+| 10.4 | Write report/paper: data (with documented limitations), method, results, threats to validity, reproducibility appendix | L | `[ ]` |
+| 10.5 | Clean the repository: README with exact reproduction commands, requirements pinned, licence/attribution notes | S | `[ ]` |
+
+---
+
+## 13. Decision log and open decisions
+
+| ID | Decision | Status | Notes |
+|---|---|---|---|
+| D-01 | Target = all-India HH:00 demand snapshot (MW) | **Decided (working)** 2026-10-13 | Consistent across regimes; hourly-mean sensitivity planned |
+| D-02 | Weather locations = 12 cities across 5 grid regions | **Approved by owner** 2026-10-13 | Downloaded; city selection is a stated limitation |
+| D-03 | Aggregation weights for national weather | **Decided (working) 2026-10-13** | Baseline = equal weights over the 5 grid regions (region mean of its cities, then mean of regions). Population-/consumption-weighted versions are sensitivity analyses (3.7) and need a cited source before use; none is adopted without one |
+| D-04 | Train/validation/test boundaries | **Frozen 2026-10-13 (approved by owner)** | Train targets 2021-09-01 → 2023-12-31; validation 2024-01-01 → 2024-06-30; test 2024-07-01 → 2025-06-24 (touched once). See `docs/experiment_protocol.md` |
+| D-05 | Cleaning thresholds: 80–260 GW bounds, 15 % jump + return rule, 10 % isolated-point rule, ≤ 3 h interpolation | **Frozen 2026-10-13** | Set from physical plausibility and hour-to-hour deviation statistics of the whole series, which includes the future validation/test years (no forecast performance used). Disclose this in the write-up; a robustness run with the rules applied only on training-period statistics can be added |
+| D-06 | Horizon definition | **Decided 2026-10-13 (approved by owner)** | Direct single-target forecast of demand at t+h, one model per horizon, h ∈ {1, 6, 24, 48} |
+| D-07 | Trend handling (absolute demand vs ratio/difference to a lag) | **Recommendation recorded 2026-10-13; final choice on validation in Phase 5** | Training-period EDA: full-year mean +7.8% (2022→2023), monthly YoY from −1% to +22% (weather-driven), strong weekly/daily seasonality. Primary candidate: target relative to the seasonal anchor; comparison variant: absolute MW. Both are run; the choice is frozen using validation results only |
+| D-08 | Include regional/state festivals | **Deferred 2026-10-13** | Core model uses the 85 verified central holidays only; regional festivals become optional extension 9.3 after the main results exist |
+| D-09 | Handling of preceding-hour weather vs instant demand | **Decided 2026-10-13** | No shift. Precipitation and radiation are preceding-hour aggregates that end at their label, so they are fully known at that label, the same instant as the demand snapshot |
+| D-10 | Whether to use solar/wind past values (G4) | **Open** | Past values only; actual future values never |
+| D-11 | Which weather scenario is the headline result | **Decided 2026-10-13 (approved by owner)** | Scenario A (no future weather) is the headline; B (oracle weather at t+h) is an upper bound; C optional |
+| D-13 | Weather scenario C (real forecast weather) | **Feasible with caveats — decide at protocol time** | Open-Meteo Historical *Forecast* API only stitches the first hours of each run (not a true day-ahead forecast) and must NOT be used for 24/48 h leads. Previous Runs API (`gfs_seamless`, `*_previous_day1/2`) gives lead-time-specific GFS forecasts for 2021-09 to 2025-06, but **missing ≈ 43 h in 2023-12 and ≈ 450 h in 2024-01** (sits at the train/validation boundary), and in a Delhi spot check was biased about +3 to +4 °C vs ERA5 with MAE 4.2 °C (day 1) and 4.6 °C (day 2) in May 2023. Using it requires either bias handling or training on forecast data; ECMWF IFS runs only from mid-2024. Scenario C would therefore be an optional, clearly caveated analysis on the later period |
+| D-14 | Valid-sample rule | **Decided (working) 2026-10-13** | A sample is valid only if its target is observed (not missing, not imputed); all models are compared on the same valid samples; counts are reported |
+| D-12 | Demand definition = all-India demand met (SCADA, MW) | **Assumed** | Supported by Zenodo cross-check (r = 0.997, MAPE 0.57 %) |
+
+---
+
+## 14. Risks and mitigations
+
+| Risk | Mitigation |
+|---|---|
+| Only ~3.8 years of hourly data → few festival repetitions, limited season cycles | Report uncertainty honestly; use daily Zenodo data (2013–2024) as a supplementary festival analysis |
+| Demand growth makes test data higher than training range (trees cannot extrapolate) | Model relative to a lagged level or add a trend term; report separately |
+| Sampling-regime change (5 min / 10 s / hourly) may create inconsistent behaviour | Include `source_regime`; test robustness (8.5) |
+| Cleaning choices influence results | Freeze before test, report sensitivity |
+| ERA5 reanalysis is not a forecast | Scenarios A/B/C, clearly labelled |
+| Weather aggregation is a design choice | Sensitivity analysis (3.7) |
+| LSTM tuning cost on a student machine | Modest architecture, equal and limited search budgets, log everything |
+| Scope creep | Core vs optional split; extensions only after Phase 8 |
+| Gap may not be novel | Phase 10.1 before any publication claim |
+
+---
+
+## 15. Next actions (always keep this list short and current)
+
+1. `git init` and a first commit (raw data and generated files are already git-ignored).
+2. Implement the baselines (Phase 5) on the validation period, log them, and use them to freeze D-07 (the last open Gate 3 items).
+3. Optional now/later: hourly-mean sensitivity target (2.6).
+
+Done recently: training-period EDA (4.2); matplotlib installed and cleaning figure made (2.5); 1.4 weather units; 1.5 holidays verified; 1.8 forecast-weather availability; Phase 2 cleaning; Phase 3 canonical dataset; 4.1 experiment protocol (2026-10-13).
