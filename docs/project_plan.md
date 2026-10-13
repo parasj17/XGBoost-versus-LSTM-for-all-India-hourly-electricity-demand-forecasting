@@ -223,8 +223,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 ## 15. Next actions (always keep this list short and current)
 
-1. `git init` and a first commit (raw data and generated files are already git-ignored).
-2. Implement the baselines (Phase 5) on the validation period, log them, and use them to freeze D-07 (the last open Gate 3 items).
-3. Optional now/later: hourly-mean sensitivity target (2.6).
+1. Implement the baselines (Phase 5) on the validation period, log them, and use them to freeze D-07 (the last open Gate 3 items).
+2. Optional now/later: hourly-mean sensitivity target (2.6).
 
-Done recently: training-period EDA (4.2); matplotlib installed and cleaning figure made (2.5); 1.4 weather units; 1.5 holidays verified; 1.8 forecast-weather availability; Phase 2 cleaning; Phase 3 canonical dataset; 4.1 experiment protocol (2026-10-13).
+Done recently: `git init` + first commit f2a56f3 (2026-10-14); training-period EDA (4.2); matplotlib installed and cleaning figure made (2.5); 1.4 weather units; 1.5 holidays verified; 1.8 forecast-weather availability; Phase 2 cleaning; Phase 3 canonical dataset; 4.1 experiment protocol (2026-10-13).

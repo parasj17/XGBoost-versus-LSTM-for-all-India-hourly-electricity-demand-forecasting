@@ -85,4 +85,4 @@ Anything changed after results were seen is appended here with date, reason, and
 - [x] Metrics, comparison procedure and logging defined
 - [~] D-07 trend formulation: EDA done, recommendation recorded; final choice needs validation results from the baselines
 - [ ] Baselines implemented and logged (Phase 5)
-- [ ] `git init` done
+- [x] `git init` done (2026-10-14; first commit f2a56f3; record the commit hash in every run log)
