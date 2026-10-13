@@ -28,6 +28,7 @@ feature pipeline.
 
 Usage (project root):  py scripts/build_canonical_dataset.py
 """
+import argparse
 import sys
 from pathlib import Path
 
@@ -50,6 +51,7 @@ VARS = {  # API name -> canonical name
     "cloud_cover": "cloud_cover_pct",
     "shortwave_radiation": "ghi_wm2",
 }
+WEIGHTS_CSV = ROOT / "data" / "interim" / "weather_region_weights.csv"
 REGION_COL = {"Northern": "n", "Western": "w", "Southern": "s", "Eastern": "e", "North-Eastern": "ne"}
 
 
@@ -61,6 +63,13 @@ def load_weather() -> pd.DataFrame:
 
 
 def main():
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--weights", choices=["equal", "population", "consumption"], default="equal",
+                    help="region weights for the national aggregate (default: equal, decision D-03)")
+    ap.add_argument("--out", default=None, help="output CSV (default: the canonical file for equal weights)")
+    args = ap.parse_args()
+    out_path = Path(args.out) if args.out else OUT
+    default_run = args.weights == "equal" and args.out is None
     for p in (DEMAND, CAL):
         if not p.exists():
             sys.exit(f"Missing {p}; run the earlier scripts first (see README).")
@@ -69,7 +78,12 @@ def main():
 
     # region mean, then equal-weight mean of regions
     reg = w.groupby(["timestamp", "grid_region"])[list(VARS)].mean()
-    nat = reg.groupby("timestamp").mean().rename(columns=VARS)
+    if args.weights == "equal":
+        nat = reg.groupby("timestamp").mean().rename(columns=VARS)
+    else:
+        wts = pd.read_csv(WEIGHTS_CSV, index_col=0)[args.weights]   # run compute_region_weights.py first
+        wr = reg.index.get_level_values("grid_region").map(wts).to_numpy()
+        nat = reg.mul(wr, axis=0).groupby("timestamp").sum().rename(columns=VARS)  # weights sum to 1
     temp_reg = reg["temperature_2m"].unstack("grid_region").rename(
         columns={k: f"temp_c_{v}" for k, v in REGION_COL.items()})
     # national night = shortwave radiation is 0 at every city
@@ -87,7 +101,11 @@ def main():
     assert out[cal.columns.difference(["holiday_name", "festival_name"])].notna().all().all()
 
     assert len(out) == 33432 and out.index.is_unique and out.index.is_monotonic_increasing
-    out.to_csv(OUT, float_format="%.4f")
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+    out.to_csv(out_path, float_format="%.4f")
+    if not default_run:
+        print(f"wrote sensitivity dataset {out_path} (weights: {args.weights})")
+        return
 
     yr = out.index.year
     nz = out.loc[out["is_national_night"]]

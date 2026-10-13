@@ -21,6 +21,7 @@ Outputs: reports/tables/baselines_validation.md and .jsonl (one JSON line per ru
 with git commit, dataset hash, timings).
 Usage:   py scripts/run_baselines.py
 """
+import argparse
 import hashlib
 import json
 import math
@@ -136,9 +137,22 @@ def block_ci(d, rng):
 
 
 def main():
-    df = pd.read_csv(SRC, parse_dates=["timestamp"]).set_index("timestamp")
+    ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    ap.add_argument("--canonical", default=str(SRC), help="canonical dataset to use (default: equal-weight weather)")
+    ap.add_argument("--tag", default="", help="suffix for the output files of a sensitivity run")
+    ap.add_argument("--train-target", choices=["snapshot", "hourmean"], default="snapshot",
+                    help="hourmean: train on the robust hourly mean (2021-2023 only); validation is always scored on the HH:00 snapshot")
+    args = ap.parse_args()
+    src = Path(args.canonical)
+    out_md = OUT_MD.with_name(f"baselines_validation{'_' + args.tag if args.tag else ''}.md")
+    out_jsonl = OUT_JSONL.with_name(f"baselines_validation{'_' + args.tag if args.tag else ''}.jsonl")
+    df = pd.read_csv(src, parse_dates=["timestamp"]).set_index("timestamp")
     df = df.loc[:VAL_END]                  # the test period is never loaded
-    sha = hashlib.sha256(SRC.read_bytes()).hexdigest()
+    hm = None
+    if args.train_target == "hourmean":
+        hm = pd.read_csv(ROOT / "data" / "interim" / "demand_hourmean_2021_2023.csv",
+                         parse_dates=["timestamp"]).set_index("timestamp")["demand_hourmean_mw"]
+    sha = hashlib.sha256(src.read_bytes()).hexdigest()
     commit, dirty = git_state()
     rng = np.random.default_rng(SEED)
     train_peak_thr = df.loc[:TRAIN_END, "electricity_demand_mw"].quantile(0.95)
@@ -158,12 +172,13 @@ def main():
         n_tr, n_va = int(in_tr.sum()), int(in_va.sum())
         n_va_all = int(((T >= VAL_START) & (T <= VAL_END)).sum())
         yv = b["target"][in_va]
+        b["target_train"] = b["target"] if hm is None else hm.reindex(df.index).shift(-h).combine_first(b["target"])
         preds = {"persistence": b["y"][in_va], "snaive24": b["anchors"]["a24"][in_va],
                  "snaive168": b["anchors"]["a168"][in_va]}
         info = {}
         for name, Xd in X.items():
             rel = name.endswith("rel")
-            tgt = (b["target"] / b["anchors"]["a24"]) if rel else b["target"]
+            tgt = (b["target_train"] / b["anchors"]["a24"]) if rel else b["target_train"]
             best = None
             t0 = time.perf_counter()
             for a in ALPHAS:
@@ -207,7 +222,7 @@ def main():
         pk = yv >= train_peak_thr
         lines.append(f"Peak hours (target >= 95th percentile of TRAINING demand, {train_peak_thr / 1000:.0f} GW; n={int(pk.sum())}): "
                      f"MAE {np.mean(np.abs(preds[bestk][pk] - yv[pk])):,.0f} MW vs {np.mean(np.abs(preds['snaive168'][pk] - yv[pk])):,.0f} MW for snaive168.")
-        jl.append({"run_date": pd.Timestamp.now().isoformat(timespec="seconds"), "stage": "baselines_validation", "horizon": h,
+        jl.append({"run_date": pd.Timestamp.now().isoformat(timespec="seconds"), "stage": "baselines_validation", "tag": args.tag, "train_target": args.train_target, "canonical": str(src.name), "horizon": h,
                    "git_commit": commit, "git_dirty": dirty, "dataset_sha256": sha, "dataset_rows_loaded": len(df),
                    "split": {"train_target_end": str(TRAIN_END), "val": [str(VAL_START), str(VAL_END)]},
                    "n_train": n_tr, "n_val_valid": n_va, "seed": SEED, "ridge": info, "metrics": res})
@@ -222,9 +237,9 @@ def main():
               f"Dataset sha256 `{sha[:16]}...`, git commit `{(commit or 'n/a')[:10]}` (working tree dirty: {dirty}). "
               f"Validation targets {VAL_START:%Y-%m-%d} to {VAL_END:%Y-%m-%d}. The test period was not loaded. "
               "All models use the same valid samples per horizon. Scenario A (no future weather).", ""]
-    OUT_MD.parent.mkdir(parents=True, exist_ok=True)
-    OUT_MD.write_text("\n".join(header + lines + summ) + "\n", encoding="utf-8")
-    with open(OUT_JSONL, "a", encoding="utf-8") as f:
+    out_md.parent.mkdir(parents=True, exist_ok=True)
+    out_md.write_text("\n".join(header + lines + summ) + "\n", encoding="utf-8")
+    with open(out_jsonl, "a", encoding="utf-8") as f:
         for r in jl:
             f.write(json.dumps(r) + "\n")
     print("\n".join(lines + summ))

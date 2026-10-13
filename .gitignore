@@ -1,6 +1,7 @@
 # Large raw data and generated artifacts
 data/raw/*
 !data/raw/calendar/
+!data/raw/population/
 data/interim/
 data/processed/
 *.zip
