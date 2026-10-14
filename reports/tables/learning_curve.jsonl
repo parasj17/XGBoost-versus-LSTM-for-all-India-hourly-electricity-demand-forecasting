@@ -1,0 +1,8 @@
+{"horizon": 1, "size": "12 months", "git_commit": "db9baaaf989ef167e952c74c46d69e4e3a3f911b", "n": 8757, "XGB S1_calendar": 1114.5342812729307, "XGB S4_full_A": 1160.1456746480899, "LSTM L1": 1570.9171164883091}
+{"horizon": 1, "size": "18 months", "git_commit": "db9baaaf989ef167e952c74c46d69e4e3a3f911b", "n": 13167, "XGB S1_calendar": 1094.3380547019965, "XGB S4_full_A": 1131.0319986104175, "LSTM L1": 1620.045875238305}
+{"horizon": 6, "size": "12 months", "git_commit": "db9baaaf989ef167e952c74c46d69e4e3a3f911b", "n": 8757, "XGB S1_calendar": 2603.596574512067, "XGB S4_full_A": 2772.0968545184855, "LSTM L1": 3053.306693556168}
+{"horizon": 6, "size": "18 months", "git_commit": "db9baaaf989ef167e952c74c46d69e4e3a3f911b", "n": 13165, "XGB S1_calendar": 2536.9284685333078, "XGB S4_full_A": 2601.5511461710007, "LSTM L1": 2976.144841876255}
+{"horizon": 24, "size": "12 months", "git_commit": "db9baaaf989ef167e952c74c46d69e4e3a3f911b", "n": 8757, "XGB S1_calendar": 3491.019234428741, "XGB S4_full_A": 3374.866477567511, "LSTM L1": 3309.6636017100827}
+{"horizon": 24, "size": "18 months", "git_commit": "db9baaaf989ef167e952c74c46d69e4e3a3f911b", "n": 13165, "XGB S1_calendar": 3422.5826526960113, "XGB S4_full_A": 3288.2723523568907, "LSTM L1": 3298.601004700756}
+{"horizon": 48, "size": "12 months", "git_commit": "db9baaaf989ef167e952c74c46d69e4e3a3f911b", "n": 8757, "XGB S1_calendar": 4531.980066333832, "XGB S4_full_A": 4634.7508863908115, "LSTM L1": 4379.3090085306785}
+{"horizon": 48, "size": "18 months", "git_commit": "db9baaaf989ef167e952c74c46d69e4e3a3f911b", "n": 13165, "XGB S1_calendar": 4457.096668914819, "XGB S4_full_A": 4518.907177812024, "LSTM L1": 4347.215717099848}

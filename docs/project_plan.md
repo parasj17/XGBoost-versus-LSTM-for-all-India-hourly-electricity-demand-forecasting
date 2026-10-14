@@ -228,4 +228,6 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 **Validation status (details in `reports/validation_summary.md`):** XGBoost stage 2 (MAE, MW; 1/6/24/48 h): 1,104 / 2,504 / 3,170 / 4,247; best ridge 1,089 / 2,941 / 3,763 / 4,663; LSTM full features 1,584 / 3,048 / 3,273 / 4,778; LSTM history+calendar (own tuning) 1,485 / 2,696 / 3,278 / 4,337. Hypothesis (not tested): LSTM weather/generation inputs hurt because validation solar exceeds the training range (8.9% of validation hours above the training maximum; mean 40% higher).
 
-Done recently: pre-test stage 2 (widened XGBoost search; own LSTM tuning for L1), 2026-10-15; Phase 7 LSTM; Phase 6 XGBoost; baselines; EDA; sensitivity analyses; leakage test.
+**Diagnostic learning curve (2026-10-15, `reports/learning_curve.md`):** the LSTM's error is flat in training-set size (12/18/28 months) at all horizons, while XGBoost keeps improving; the 'LSTM needs more data' explanation is not supported within this range. Descriptive, three sizes, no significance tests.
+
+Done recently: learning-curve diagnostic; pre-test stage 2 (widened XGBoost search; own LSTM tuning for L1), 2026-10-15; Phase 7 LSTM; Phase 6 XGBoost; baselines; EDA; sensitivity analyses; leakage test.
