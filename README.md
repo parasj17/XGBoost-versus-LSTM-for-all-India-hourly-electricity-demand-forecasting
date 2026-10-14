@@ -1,51 +1,70 @@
-# India-wide electricity demand forecasting (XGBoost / LSTM) — data phase
+# India-wide electricity demand forecasting: XGBoost vs LSTM
 
-Research objective: investigate India-wide electricity-demand forecasting with machine learning and deep learning (primarily XGBoost and LSTM), integrating historical demand with weather and calendar/festival effects, and evaluating multi-step accuracy, uncertainty and computational efficiency.
+Research objective: forecast all-India hourly electricity demand 1, 6, 24 and 48 hours ahead with machine learning and deep learning (XGBoost and LSTM, plus ridge and naive baselines), using historical demand, weather and calendar/festival information, and compare accuracy, uncertainty and computational efficiency.
 
-**Current phase: dataset acquisition, audit and design. No models have been trained.**
+**Current phase: experiments finished (validation and the single test run); novelty check and writing remain.** See `docs/project_plan.md` (living plan, decision log, next actions) and `docs/experiment_protocol.md` (frozen protocol, deviation log).
 
-## Status in one paragraph
-The Mendeley dataset is all-India (no regional split), covers 2021-09-01 → 2025-06-24 (not June 2025 or Dec 2023 as the metadata says), and is hourly only for 2024–25; earlier months are 5-minute and 10-second SCADA data that must be reduced to hourly. After cleaning (outage zeros, spikes) it is suitable for India-wide hourly forecasting. Weather (ERA5 via Open-Meteo, 12 cities) is downloaded but not yet aggregated; the holiday file is built from DoPT memoranda. See `reports/dataset_audit.md`.
+## Results in brief (test period 2024-07-01 to 2025-06-24, MAE in MW)
+| Model | 1 h | 6 h | 24 h | 48 h |
+|---|---:|---:|---:|---:|
+| Best naive | 4,272 | 5,414 | 5,414 | 6,964 |
+| Ridge | 1,049 | 3,082 | 4,214 | 5,549 |
+| XGBoost (declared headline) | 1,111 | 2,747 | 3,728 | 5,158 |
+| LSTM full features (declared headline) | 1,643 | 3,170 | 3,743 | 5,325 |
+XGBoost is best from 6 h on (the LSTM is not distinguishable from it at 24-48 h); ridge and XGBoost tie at 1 h. Details, intervals and caveats: `reports/test_summary.md`, `reports/research_question_answers.md`.
+
+## Data
+- Demand, solar, wind: Mendeley Data "Electricity Demand, Solar and Wind Generation Data (September 2021 - June 2025) of India" (all-India, 2021-09-01 to 2025-06-24; 5-minute / 10-second / hourly sampling reduced to HH:00 snapshots). Audit: `reports/dataset_audit.md`.
+- Weather: Open-Meteo ERA5 reanalysis for 12 cities, aggregated to a national equal-weight series. Calendar: 85 central gazetted holidays verified against the DoPT memoranda.
+- Cleaning rules and canonical dataset: `reports/cleaning_log.md`, `reports/canonical_dataset_log.md`, `reports/data_dictionary.md`.
 
 ## Layout
 ```
-data/raw/electricity_mendeley/   extracted Mendeley workbooks (do not edit)
-data/raw/Electricity ... .zip    original download (do not edit)
-data/raw/weather/                Open-Meteo ERA5 CSVs, 12 cities (downloaded)
-data/raw/calendar/               sourced holiday CSV (tracked in git)
-data/raw/zenodo_state_daily/     Zenodo 14983362 daily state energy + weather (42 files, MD5-verified)
-data/interim/                    audit outputs, parse cache (regenerable)
-data/processed/                  calendar features (canonical dataset not built yet)
-reports/                         inventory, audit, data dictionary, acquisition plan
-scripts/                         inspect_electricity_data.py, build_hourly_dataset.py, build_canonical_dataset.py, plot_cleaning_check.py, eda_training_period.py, run_baselines.py, inspect_weather_data.py, build_calendar_features.py,
-                                 download_zenodo_state_daily.py
-references.md                    all external sources and literature
-docs/                            literature review, research gap and methodology context
+data/raw/            downloads (git-ignored except calendar and population CSVs)
+data/interim/        regenerable caches, saved predictions (git-ignored)
+data/processed/      cleaned and canonical datasets (git-ignored, regenerable)
+scripts/             all code (see below)
+tests/               leakage test for the feature pipeline
+reports/             audits, logs, result tables (reports/tables), figures (reports/figures)
+docs/                project plan, experiment protocol, literature review
+references.md        external sources
 ```
-`data/raw/*` (except `calendar`), `data/interim`, `data/processed` are git-ignored because they are large/regenerable.
 
 ## Setup
 ```powershell
 py -m pip install -r requirements.txt
 ```
-(`py` is the Python launcher on this machine; `python` alone is not on PATH.)
+(`py` is the Python launcher on this machine.) PyTorch (CPU) is needed for the LSTM and is installed separately.
 
-## Reproduce this phase
+## Reproduce
 ```powershell
-py scripts\inspect_electricity_data.py      # audit all workbooks (~35 min first run, cached afterwards)
-py scripts\build_calendar_features.py       # calendar_daily.csv / calendar_hourly.csv
-py scripts\inspect_weather_data.py --pilot  # small API check, saves nothing
+py scripts\inspect_electricity_data.py         # audit all workbooks (about 35 min first run)
+py scripts\inspect_weather_data.py --fetch     # download ERA5 weather
+py scripts\build_calendar_features.py
+py scripts\build_hourly_dataset.py             # cleaned hourly demand/solar/wind
+py scripts\compute_region_weights.py           # sensitivity weights for the weather aggregate
+py scripts\build_canonical_dataset.py          # merge demand + weather + calendar
+py tests\test_leakage.py                       # leakage test of the feature pipeline
+py scripts\eda_training_period.py              # exploratory analysis, training period only
+py scripts\run_baselines.py                    # naive and ridge baselines on validation
+py scripts\run_xgboost.py ; py scripts\run_xgboost.py --wide   # XGBoost stage 1 and stage 2 (validation)
+py scripts\run_lstm.py ; py scripts\run_lstm.py --stage2       # LSTM stage 1 and stage 2 (validation)
+py scripts\run_learning_curve.py               # diagnostic learning curve (validation)
+py scripts\run_test_evaluation.py --check      # dry run of the test script on VALIDATION data
 ```
-Scripts use paths relative to the project root and have `--help`.
+**The test period is single-use.** `py scripts\run_test_evaluation.py` evaluates the frozen configuration once and then refuses to run again (lock file `reports/tables/TEST_RUN_DONE.lock`); `--export` re-runs it unchanged only to save predictions. Afterwards:
+```powershell
+py scripts\run_rolling_origin.py               # stability on 2023 folds (no validation/test data)
+py scripts\run_quantile_xgb.py                 # XGBoost quantile models (intervals)
+py scripts\analyze_predictions.py              # hour of day, robustness, 90% intervals
+py scripts\analyze_ablation_ci.py              # paired feature-group effects with intervals
+```
+Scripts use paths relative to the project root and have `--help` or a docstring.
 
-## Plan
-`docs/project_plan.md` is the living plan (phases, gates, decision log, next actions). Work follows it.
-
-## Reports
-- `reports/dataset_inventory.md` — what is in the workspace, what could and could not be accessed
-- `reports/dataset_audit.md` — verified schema, period, resolution, quality issues
-- `reports/data_dictionary.md` — proposed canonical columns, units, sources, cleaning rules
-- `reports/data_acquisition_plan.md` — target definition, weather/calendar design, leakage rules, uncertainty and efficiency plan, next steps
+## Key documents
+- `docs/project_plan.md`, `docs/experiment_protocol.md`: plan, frozen protocol, deviations log.
+- `reports/validation_summary.md`, `reports/test_summary.md`, `reports/research_question_answers.md`: results.
+- `reports/test_results.md`: full test tables (paired comparisons, breakdowns); `reports/uncertainty.md`, `reports/rolling_origin.md`, `reports/hour_of_day.md`, `reports/robustness.md`, `reports/ablation_paired.md`, `reports/learning_curve.md`.
 
 ## Data licences
 Mendeley dataset: CC BY 4.0 (cite DOI 10.17632/y58jknpgs8.2). Open-Meteo: free for non-commercial use with attribution. See `references.md`.
