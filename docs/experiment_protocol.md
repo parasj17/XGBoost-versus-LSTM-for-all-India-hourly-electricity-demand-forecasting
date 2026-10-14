@@ -93,3 +93,27 @@ Anything changed after results were seen is appended here with date, reason, and
 - [x] D-07 trend formulation frozen (relative to anchor)
 - [x] Baselines implemented and logged (Phase 5): `reports/tables/baselines_validation.md`
 - [x] `git init` done (2026-10-14; first commit f2a56f3; record the commit hash in every run log)
+
+## 15. Frozen test configuration (2026-10-15; approved by the owner; written before any test-period evaluation code existed)
+
+**Test period:** targets 2024-07-01 00:00 to 2025-06-24 23:00. It is evaluated **once**. The script refuses to run twice (lock file) and requires a clean git tree so the commit hash is logged. Anything changed after the results are seen is a post-hoc deviation (section 13) and must be reported as such.
+
+**Fitting rule (all learned models):** fit on the training period only (targets up to 2023-12-31 23:00); no retraining on train+validation; no early stopping on test; the number of boosting trees / LSTM epochs is the one found on validation for the same horizon, feature set and seed (XGBoost: best_iteration + 1; LSTM: best epoch). Three seeds (0, 1, 2); the headline prediction is the mean of the three seeds' predictions (same convention as validation), per-seed results are also reported. Scaling statistics come from the training period only.
+
+**Models and hyper-parameters (all taken from the logged validation runs, nothing re-tuned):**
+| Model | Role | Configuration source |
+|---|---|---|
+| Persistence, same-hour-yesterday/day-before (snaive24), same-hour-last-week (snaive168) | naive references | no fitting |
+| Ridge | strongest linear reference | the variant (history+calendar or full; absolute or relative target) and penalty with the lowest validation MAE, re-selected on validation by the same code, then fitted on train |
+| **XGBoost, feature set S4_full_A, ratio target** | **declared headline (XGBoost)** | stage-2 parameters per horizon from `reports/tables/xgboost_validation_wide.jsonl` |
+| XGBoost S0, S1, S2, S3, S5 (same hyper-parameters, ratio target) | ablation; S5 uses oracle weather at t+h and is only an upper bound | same file |
+| **LSTM, full features L4_full_A** | **declared headline (LSTM)** | stage-1 tuned parameters, `reports/tables/lstm_validation.jsonl` |
+| LSTM history+calendar L1 with its own tuning | reported variant, same inputs as XGBoost S1 | `reports/tables/lstm_validation_stage2_L1.jsonl` |
+
+**Samples:** a test sample is valid if its target is observed (not missing, not imputed) and every input of the four ridge variants is present; all models are scored on the same valid samples; counts are reported.
+
+**Metrics and comparisons:** MAE, RMSE, MAPE, WAPE, R2 and skill against the best naive baseline, per horizon (1, 6, 24, 48 h). Paired comparisons (95% moving-block bootstrap, block 168 h, 1,000 resamples, plus a Diebold-Mariano statistic on absolute-error differences with Newey-West lag h-1): XGBoost headline vs best ridge, vs best naive; LSTM L4 vs XGBoost; LSTM L1 vs XGBoost; both LSTMs vs ridge. MAE breakdowns for the headline models, ridge and the best naive: season, weekday/weekend/holiday (target day), within one day of a major festival, peak hours (target at or above the 95th percentile of TRAINING demand; because demand grows, the share of such hours in the test period is reported).
+
+**Not part of this run:** rolling-origin stability (section 9, uses train+validation only), uncertainty intervals (section 10), scenario C. Efficiency numbers of the refits are logged but the primary efficiency comparison remains the validation-period logs.
+
+**Interpretation constraints decided in advance:** (i) the declared headlines are the XGBoost S4 and LSTM L4 models, the others are secondary; (ii) the tuning budgets differ (XGBoost 90 trials per horizon, LSTM 12 for L4 plus 12 for L1) and this must be stated next to any accuracy comparison; (iii) differences whose paired interval includes zero are reported as "not distinguishable", not as wins.
