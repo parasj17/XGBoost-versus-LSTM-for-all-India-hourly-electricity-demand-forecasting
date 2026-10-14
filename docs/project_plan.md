@@ -154,9 +154,9 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 | # | Task | Size | Status |
 |---|---|---|---|
-| 8.1 | Final test evaluation (once), all models, all horizons | M | `[~]` configuration frozen and approved by the owner 2026-10-15 (protocol section 15); script `scripts/run_test_evaluation.py` checked on validation, real single run started at commit 155b206; results will be in `reports/test_results.md` |
-| 8.2 | Error breakdowns: horizon, hour, season, holiday vs non-holiday, peaks, festival windows | M | `[ ]` |
-| 8.3 | Significance of differences (Diebold–Mariano or block bootstrap) | M | `[ ]` |
+| 8.1 | Final test evaluation (once), all models, all horizons | M | `[x]` run once on 2026-10-15 at commit 155b206 (67 min); results in `reports/test_results.md`, summary in `reports/test_summary.md`; lock file `reports/tables/TEST_RUN_DONE.lock` prevents a second run |
+| 8.2 | Error breakdowns: horizon, hour, season, holiday vs non-holiday, peaks, festival windows | M | `[~]` season, day type, festival window and peak subsets are in `reports/test_results.md`; hour-of-day breakdown not done |
+| 8.3 | Significance of differences (Diebold–Mariano or block bootstrap) | M | `[x]` block-bootstrap CIs and DM statistics for six pairs per horizon in `reports/test_results.md` |
 | 8.4 | Rolling-origin stability check | M | `[ ]` |
 | 8.5 | Robustness: performance on the cleaned vs raw-flagged periods, the sampling-regime change, hourly-mean target sensitivity | M | `[ ]` |
 | 8.6 | Answer the sub-questions in the literature document (weather? festivals? horizons? solar/wind?) with evidence | M | `[ ]` |
@@ -223,8 +223,11 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 ## 15. Next actions (always keep this list short and current)
 
-1. **Running now:** the one-time test evaluation (8.1), frozen configuration in protocol section 15. When it finishes: read `reports/test_results.md`, record the results here, and commit. No model or setting may be changed after seeing the results (any change = logged post-hoc deviation).
-2. After the test run: error analysis (8.2), significance (8.3), rolling-origin stability on train+validation only (8.4), robustness (8.5), sub-question answers (8.6); optional uncertainty extension (9.1); novelty search and writing (Phase 10).
+1. **Owner review** of `reports/test_summary.md` (test results). No model or setting may be changed in response without logging a post-hoc deviation in the protocol.
+2. Remaining evaluation tasks: rolling-origin stability on train+validation only (8.4), robustness checks (8.5), hour-of-day breakdown (8.2), answers to the literature-document sub-questions with evidence (8.6).
+3. Optional extensions: uncertainty intervals (9.1), regional daily study (9.2); then the novelty search and writing (Phase 10).
+
+**Test results (MAE, MW; 1/6/24/48 h; `reports/test_summary.md`):** XGBoost headline 1,111 / 2,747 / 3,728 / 5,158; ridge 1,049 / 3,082 / 4,214 / 5,549; LSTM full features 1,643 / 3,170 / 3,743 / 5,325; LSTM history+calendar 1,527 / 2,981 / 3,753 / 5,280; best naive 4,272 / 5,414 / 5,414 / 6,964. XGBoost beats ridge at 6-48 h; at 1 h they are not distinguishable; the LSTM is worse than XGBoost at 1-6 h and not distinguishable from it at 24-48 h. Past weather/solar/wind did not help on test (they did on validation); oracle weather would (-5.9% at 24 h, -11.5% at 48 h); holiday features give 1-2%.
 
 **Validation status (details in `reports/validation_summary.md`):** XGBoost stage 2 (MAE, MW; 1/6/24/48 h): 1,104 / 2,504 / 3,170 / 4,247; best ridge 1,089 / 2,941 / 3,763 / 4,663; LSTM full features 1,584 / 3,048 / 3,273 / 4,778; LSTM history+calendar (own tuning) 1,485 / 2,696 / 3,278 / 4,337. Hypothesis (not tested): LSTM weather/generation inputs hurt because validation solar exceeds the training range (8.9% of validation hours above the training maximum; mean 40% higher).
 
