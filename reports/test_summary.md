@@ -22,7 +22,7 @@ Source: `reports/test_results.md` (full tables, paired intervals, breakdowns), `
 ## What the test period supports
 - XGBoost beats ridge at 6, 24 and 48 h (intervals exclude zero). At 1 h XGBoost and ridge are not distinguishable by the bootstrap interval; the point estimate favours ridge (the Diebold-Mariano statistic points the same way but understates uncertainty because hourly errors are strongly autocorrelated). At 1 h XGBoost's RMSE (2,140 MW) is much larger than ridge's (1,562 MW) while MAE is similar, so XGBoost has some larger errors; in winter and pre-monsoon its 1 h error is above ridge's (e.g. winter 1,574 vs 1,205 MW). The cause was not investigated.
 - The LSTM is worse than XGBoost at 1 h and 6 h (intervals exclude zero) and **not distinguishable from XGBoost at 24 h and 48 h**. Both LSTM variants beat ridge at 24 h and 48 h; at 6 h they are not distinguishable from ridge.
-- Nobody beats the naive baselines by less than 20%; at 6 to 48 h the best models are 43-50%, 22-31%, 20-26% better than the best naive baseline.
+- Skill against the best naive baseline (ridge, XGBoost and the LSTMs): about 75% at 1 h (ridge and XGBoost; 61-64% for the LSTMs), 41-50% at 6 h, 22-31% at 24 h and 20-26% at 48 h.
 
 ## Validation versus test
 | Model (MAE, MW) | 1 h val -> test | 6 h | 24 h | 48 h |
