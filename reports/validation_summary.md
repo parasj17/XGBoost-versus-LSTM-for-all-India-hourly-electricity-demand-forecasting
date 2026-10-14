@@ -33,3 +33,32 @@ Sources: `reports/tables/baselines_validation.md`, `xgboost_validation.md`, `lst
 | Peak working set | about 410 MB | about 730 MB |
 | Inference | 22-56 ms for 4,367 rows | 60-164 ms for 1,024 windows (roughly 10-30 times more per sample) |
 Single-sample latencies (XGBoost 12.6-13 ms, LSTM 1.2-1.9 ms) were measured through different Python interfaces and are dominated by overhead, so they are not comparable.
+
+---
+
+# Pre-test stage 2 (2026-10-15; specified in the protocol deviation log before it was run)
+
+XGBoost: 60 further random trials per horizon with widened ranges, plus the stage-1 best re-fitted as a competitor (`reports/tables/xgboost_validation_wide.md`). LSTM: the history+calendar variant (L1) tuned on its own, 12 trials per horizon, 3 final seeds (`reports/tables/lstm_validation_stage2_L1.md`). All selection used validation only. The test period was not loaded.
+
+| Model (validation MAE, MW) | 1 h | 6 h | 24 h | 48 h |
+|---|---:|---:|---:|---:|
+| Best ridge | 1,089 | 2,941 | 3,763 | 4,663 |
+| XGBoost stage 1 | 1,104 | 2,541 | 3,174 | 4,247 |
+| **XGBoost stage 2 (pre-declared final headline)** | 1,104 | **2,504** | **3,170** | **4,247** |
+| LSTM full features (stage-1 headline, unchanged) | 1,584 | 3,048 | 3,273 | 4,778 |
+| LSTM history+calendar, stage 1 | 1,503 | 2,619 | 3,300 | 4,392 |
+| LSTM history+calendar, own tuning (stage 2) | 1,485 | 2,696 | 3,278 | 4,337 |
+
+Stage-2 paired intervals (MAE difference, negative = first model better; 95% block bootstrap):
+- XGBoost stage 2 minus best ridge: 1 h +15 (-14 to +44); 6 h -437 (-520 to -317); 24 h -592 (-773 to -452); 48 h -416 (-678 to -87).
+- LSTM L1 (own tuning) minus best ridge: 1 h +396 (+340 to +473); 6 h -245 (-398 to -60); 24 h -484 (-698 to -301); 48 h -325 (-509 to -133).
+- LSTM L1 (own tuning) minus XGBoost stage 2: 1 h +381 (+331 to +440); 6 h +192 (+19 to +356); 24 h +108 (-113 to +370); 48 h +90 (-237 to +397).
+
+## What stage 2 changed
+- The widened XGBoost search changed the chosen configuration at 6 h (-1.5%) and 24 h (-0.1%); at 1 h and 48 h the stage-1 configuration won. At 24 h the new best (depth 10, strong regularisation) is very different from the old (depth 7) yet scores the same, i.e. a flat optimum. XGBoost was not badly under-tuned in stage 1.
+- Own tuning of the LSTM L1 variant did not change the picture (differences of -75 to +77 MW against stage 1, inside seed noise).
+- Conclusions that survive: XGBoost beats ridge at 6, 24 and 48 h; the two are tied at 1 h; the LSTM is clearly worse than XGBoost at 1 h and 6 h (the 6 h interval now excludes zero for L1) and **not distinguishable from XGBoost at 24 h and 48 h**.
+
+## Cost of stage 2 (4-thread CPU)
+XGBoost: 240 + 4 tuning fits in 43.5 min and 144 ablation fits in 27.7 min. LSTM L1: 48 tuning trials in 47 min and 12 final fits (about 26 min of the 73.5 min total run).
+Total tuning budget now: XGBoost 90 trials per horizon, LSTM 12 (L4) + 12 (L1) per horizon.
