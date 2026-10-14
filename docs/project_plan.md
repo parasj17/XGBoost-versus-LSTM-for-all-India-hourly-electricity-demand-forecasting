@@ -154,7 +154,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 | # | Task | Size | Status |
 |---|---|---|---|
-| 8.1 | Final test evaluation (once), all models, all horizons | M | `[ ]` |
+| 8.1 | Final test evaluation (once), all models, all horizons | M | `[~]` configuration frozen and approved by the owner 2026-10-15 (protocol section 15); script `scripts/run_test_evaluation.py` checked on validation, real single run started at commit 155b206; results will be in `reports/test_results.md` |
 | 8.2 | Error breakdowns: horizon, hour, season, holiday vs non-holiday, peaks, festival windows | M | `[ ]` |
 | 8.3 | Significance of differences (Diebold–Mariano or block bootstrap) | M | `[ ]` |
 | 8.4 | Rolling-origin stability check | M | `[ ]` |
@@ -223,8 +223,8 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 ## 15. Next actions (always keep this list short and current)
 
-1. **Owner decision: freeze the final configurations for the one-time test evaluation (task 8.1).** Proposal: XGBoost stage-2 headline (S4_full_A, ratio target, tuned parameters per horizon from `reports/tables/xgboost_validation_wide.jsonl`), LSTM full-feature stage-1 headline (L4) as the pre-declared LSTM headline, LSTM history+calendar (own tuning) as a reported variant, ridge and the naive baselines as references. Planned test protocol: fit once on the training period with the frozen hyper-parameters, early-stop point fixed from validation (number of boosting rounds / LSTM epochs recorded), evaluate on 2024-07-01 to 2025-06-24 without any further choices. Open question for the owner: also retrain on train+validation before testing (more data, but then no early stopping signal), or keep train-only fits (recommended for a clean comparison).
-2. After the test run: error breakdowns (8.2), significance tests (8.3), rolling-origin stability (8.4), robustness (8.5), sub-question answers (8.6); optional uncertainty extension (9.1); novelty search and writing (Phase 10).
+1. **Running now:** the one-time test evaluation (8.1), frozen configuration in protocol section 15. When it finishes: read `reports/test_results.md`, record the results here, and commit. No model or setting may be changed after seeing the results (any change = logged post-hoc deviation).
+2. After the test run: error analysis (8.2), significance (8.3), rolling-origin stability on train+validation only (8.4), robustness (8.5), sub-question answers (8.6); optional uncertainty extension (9.1); novelty search and writing (Phase 10).
 
 **Validation status (details in `reports/validation_summary.md`):** XGBoost stage 2 (MAE, MW; 1/6/24/48 h): 1,104 / 2,504 / 3,170 / 4,247; best ridge 1,089 / 2,941 / 3,763 / 4,663; LSTM full features 1,584 / 3,048 / 3,273 / 4,778; LSTM history+calendar (own tuning) 1,485 / 2,696 / 3,278 / 4,337. Hypothesis (not tested): LSTM weather/generation inputs hurt because validation solar exceeds the training range (8.9% of validation hours above the training maximum; mean 40% higher).
 
