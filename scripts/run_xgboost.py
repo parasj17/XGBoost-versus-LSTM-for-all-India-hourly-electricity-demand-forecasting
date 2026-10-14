@@ -49,6 +49,28 @@ def sample_params(rng):
             "gamma": float(rng.uniform(0, 5))}
 
 
+def sample_params_wide(rng):
+    """Stage-2 search space (protocol deviation log, 2026-10-15): widened where stage-1 optima sat at the edges."""
+    return {"learning_rate": float(np.exp(rng.uniform(np.log(0.01), np.log(0.3)))),
+            "max_depth": int(rng.integers(2, 11)),
+            "min_child_weight": float(np.exp(rng.uniform(0, np.log(100)))),
+            "subsample": float(rng.uniform(0.5, 1.0)),
+            "colsample_bytree": float(rng.uniform(0.4, 1.0)),
+            "reg_lambda": float(np.exp(rng.uniform(np.log(0.1), np.log(100)))),
+            "reg_alpha": float(np.exp(rng.uniform(np.log(1e-3), np.log(10)))),
+            "gamma": float(rng.uniform(0, 10))}
+
+
+def stage1_best(horizon):
+    """Best stage-1 tuning configuration for a horizon (from the original log)."""
+    best = None
+    for line in open(ROOT / "reports" / "tables" / "xgboost_validation.jsonl", encoding="utf-8"):
+        r = json.loads(line)
+        if r["stage"] == "tuning_trial" and r["horizon"] == horizon and (best is None or r["val_MAE_MW"] < best["val_MAE_MW"]):
+            best = r
+    return best["params"]
+
+
 def fit_predict(X_tr, y_tr, X_va, y_va, params, seed, a_va, relative):
     """Fit with early stopping on validation; return MW-scale prediction, model and timings.
 
@@ -85,8 +107,14 @@ def main():
     global N_TRIALS, SEEDS, MAX_TREES, OUT_MD, OUT_JSONL
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--smoke", action="store_true", help="tiny run (horizon 24, 2 trials, 1 seed) written to *_smoke files")
+    ap.add_argument("--wide", action="store_true", help="stage 2: widened ranges, 60 trials, stage-1 best competes (outputs *_wide)")
     args = ap.parse_args()
     horizons = rb.HORIZONS
+    sampler = sample_params
+    if args.wide:
+        N_TRIALS, MAX_TREES, sampler = 60, 3000, sample_params_wide
+        OUT_MD = OUT_MD.with_name("xgboost_validation_wide.md")
+        OUT_JSONL = OUT_JSONL.with_name("xgboost_validation_wide.jsonl")
     if args.smoke:
         N_TRIALS, SEEDS, MAX_TREES, horizons = 2, [0], 200, [24]
         OUT_MD = OUT_MD.with_name("xgboost_validation_smoke.md")
@@ -105,7 +133,7 @@ def main():
           f"{NJOBS} threads on {meta['logical_cpus']} logical CPUs, CPU only. Validation targets 2024-01-01 to 2024-06-30; "
           "the test period was not loaded. Scenario A (no future weather) unless labelled oracle. Early stopping and the "
           "hyper-parameter search both use the validation period, so these validation numbers are mildly optimistic; "
-          "the honest estimate is the one-time test evaluation. The ratio target is trained as 100*(ratio-1), i.e. percent deviation from the 24 h anchor.", ""]
+          "the honest estimate is the one-time test evaluation. " + ("STAGE 2 (wide ranges, 60 trials, stage-1 best competes; trial -1 = stage-1 best). " if args.wide else "") + "The ratio target is trained as 100*(ratio-1), i.e. percent deviation from the 24 h anchor.", ""]
     summary = {}
     for h in horizons:
         b = rb.build(df, h)
@@ -126,11 +154,11 @@ def main():
                  for sname, groups in ft.FEATURE_SETS.items() for rel in (True, False)}
         # ---------- Step 1: tuning (headline set, ratio target)
         Xh = feats[(HEADLINE, True)]
-        rng = np.random.default_rng(1000 + h)
+        rng = np.random.default_rng((3000 if args.wide else 1000) + h)
         best = None
         t_search = time.perf_counter()
         for trial in range(N_TRIALS):
-            prm = sample_params(rng)
+            prm = sampler(rng)
             p, m, wall, cpu, peak = fit_predict(Xh[in_tr], (b["target"] / a24)[in_tr], Xh[in_va], (b["target"] / a24)[in_va],
                                                 prm, 0, a_va, True)
             mae = float(np.mean(np.abs(p - y_va)))
@@ -138,6 +166,16 @@ def main():
                                   "best_iteration": int(m.best_iteration), "fit_s": round(wall, 2)}) + "\n")
             if best is None or mae < best[0]:
                 best = (mae, prm, trial)
+        if args.wide:                      # the stage-1 best configuration competes under identical code
+            old = stage1_best(h)
+            p, m, wall, cpu, peak = fit_predict(Xh[in_tr], (b["target"] / a24)[in_tr], Xh[in_va], (b["target"] / a24)[in_va],
+                                                old, 0, a_va, True)
+            mae = float(np.mean(np.abs(p - y_va)))
+            log.write(json.dumps({"stage": "tuning_trial", "horizon": h, "trial": -1, "params": old, "val_MAE_MW": mae,
+                                  "best_iteration": int(m.best_iteration), "fit_s": round(wall, 2), "note": "stage-1 best re-fitted"}) + chr(10))
+            print(f"h={h}: wide-search best {best[0]:.0f} MW (trial {best[2]}) vs stage-1 best re-fitted {mae:.0f} MW", flush=True)
+            if mae <= best[0]:
+                best = (mae, old, -1)
         search_s = time.perf_counter() - t_search
         prm = best[1]
         # ---------- Step 2: ablation over feature sets, both target formulations, 3 seeds
