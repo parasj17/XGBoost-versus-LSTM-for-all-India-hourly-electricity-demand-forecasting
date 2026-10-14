@@ -1,0 +1,26 @@
+{
+ "1": {
+  "trees": 1911,
+  "fit_s": 32.0,
+  "raw_val_coverage": 0.904511106022441,
+  "inference_s_for_eval_set": 0.244
+ },
+ "6": {
+  "trees": 1343,
+  "fit_s": 22.8,
+  "raw_val_coverage": 0.8898557362033432,
+  "inference_s_for_eval_set": 0.176
+ },
+ "24": {
+  "trees": 167,
+  "fit_s": 8.8,
+  "raw_val_coverage": 0.8493244790474009,
+  "inference_s_for_eval_set": 0.076
+ },
+ "48": {
+  "trees": 974,
+  "fit_s": 17.3,
+  "raw_val_coverage": 0.8740554156171285,
+  "inference_s_for_eval_set": 0.153
+ }
+}
