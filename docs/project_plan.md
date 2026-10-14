@@ -155,17 +155,17 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | # | Task | Size | Status |
 |---|---|---|---|
 | 8.1 | Final test evaluation (once), all models, all horizons | M | `[x]` run once on 2026-10-15 at commit 155b206 (67 min); results in `reports/test_results.md`, summary in `reports/test_summary.md`; lock file `reports/tables/TEST_RUN_DONE.lock` prevents a second run |
-| 8.2 | Error breakdowns: horizon, hour, season, holiday vs non-holiday, peaks, festival windows | M | `[~]` season, day type, festival window and peak subsets are in `reports/test_results.md`; hour-of-day breakdown not done |
+| 8.2 | Error breakdowns: horizon, hour, season, holiday vs non-holiday, peaks, festival windows | M | `[x]` `reports/test_results.md` (season, day type, festival window, peak), `reports/hour_of_day.md` + `reports/figures/test_hour_of_day.png` |
 | 8.3 | Significance of differences (Diebold–Mariano or block bootstrap) | M | `[x]` block-bootstrap CIs and DM statistics for six pairs per horizon in `reports/test_results.md` |
-| 8.4 | Rolling-origin stability check | M | `[ ]` |
-| 8.5 | Robustness: performance on the cleaned vs raw-flagged periods, the sampling-regime change, hourly-mean target sensitivity | M | `[ ]` |
-| 8.6 | Answer the sub-questions in the literature document (weather? festivals? horizons? solar/wind?) with evidence | M | `[ ]` |
+| 8.4 | Rolling-origin stability check | M | `[x]` `reports/rolling_origin.md` (2 folds on 2023 + the main split; 24 h ranking stable; 6 h XGBoost-vs-ridge ranking flips between folds; 1 h ridge at least as good as XGBoost in all folds) |
+| 8.5 | Robustness: performance on the cleaned vs raw-flagged periods, the sampling-regime change, hourly-mean target sensitivity | M | `[~]` `reports/robustness.md` (excluding samples with imputed/stuck inputs; seed spread) plus earlier hourly-mean and weight sensitivities; the 5-min/10-s/hourly regime change cannot be tested on the test period (all hourly) |
+| 8.6 | Answer the sub-questions in the literature document (weather? festivals? horizons? solar/wind?) with evidence | M | `[x]` `reports/research_question_answers.md` |
 
 ## 11. Phase 9 — Optional extensions (only if time permits)
 
 | # | Task | Size | Status |
 |---|---|---|---|
-| 9.1 | Uncertainty: XGBoost quantile regression and split/adaptive conformal intervals; LSTM quantile head or MC dropout; PICP, width, pinball loss | L | `[ ]` |
+| 9.1 | Uncertainty: XGBoost quantile regression and split/adaptive conformal intervals; LSTM quantile head or MC dropout; PICP, width, pinball loss | L | `[~]` done: split, anchor-scaled and rolling conformal for XGBoost, LSTM and ridge; XGBoost quantile regression + CQR (`reports/uncertainty.md`). Not done: LSTM quantile head / MC dropout, pinball loss |
 | 9.2 | Daily regional study with Zenodo state data (regional forecasts → India total) as a separate experiment | L | `[ ]` |
 | 9.3 | Regional festivals / state holidays features | M | `[ ]` |
 | 9.4 | Gridded (population-weighted) weather alternative | M | `[ ]` |
@@ -223,9 +223,10 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 ## 15. Next actions (always keep this list short and current)
 
-1. **Owner review** of `reports/test_summary.md` (test results). No model or setting may be changed in response without logging a post-hoc deviation in the protocol.
-2. Remaining evaluation tasks: rolling-origin stability on train+validation only (8.4), robustness checks (8.5), hour-of-day breakdown (8.2), answers to the literature-document sub-questions with evidence (8.6).
-3. Optional extensions: uncertainty intervals (9.1), regional daily study (9.2); then the novelty search and writing (Phase 10).
+1. **Owner review** of `reports/test_summary.md` and `reports/research_question_answers.md`. No model or setting may be changed in response without logging a post-hoc deviation.
+2. **Phase 10 (novelty check and writing):** verify with a fresh literature search what is and is not novel (the literature document says the combination is not confirmed as novel); decide the paper/report structure.
+3. Optional extensions not done: LSTM native uncertainty (quantile head, MC dropout), regional/state festivals (9.3), regional daily study with the Zenodo data (9.2), scenario C (archived forecast weather, caveats in D-13), capacity-normalised solar/wind features.
+4. Housekeeping: delete the temporary folders `D:	mp_pip` and `D:\pylibs_verify` (outside the project); decide whether to keep `data/interim/predictions` (about 10 MB of saved predictions, git-ignored).
 
 **Test results (MAE, MW; 1/6/24/48 h; `reports/test_summary.md`):** XGBoost headline 1,111 / 2,747 / 3,728 / 5,158; ridge 1,049 / 3,082 / 4,214 / 5,549; LSTM full features 1,643 / 3,170 / 3,743 / 5,325; LSTM history+calendar 1,527 / 2,981 / 3,753 / 5,280; best naive 4,272 / 5,414 / 5,414 / 6,964. XGBoost beats ridge at 6-48 h; at 1 h they are not distinguishable; the LSTM is worse than XGBoost at 1-6 h and not distinguishable from it at 24-48 h. Past weather/solar/wind did not help on test (they did on validation); oracle weather would (-5.9% at 24 h, -11.5% at 48 h); holiday features give 1-2%.
 
@@ -233,4 +234,4 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 **Diagnostic learning curve (2026-10-15, `reports/learning_curve.md`):** the LSTM's error is flat in training-set size (12/18/28 months) at all horizons, while XGBoost keeps improving; the 'LSTM needs more data' explanation is not supported within this range. Descriptive, three sizes, no significance tests.
 
-Done recently: learning-curve diagnostic; pre-test stage 2 (widened XGBoost search; own LSTM tuning for L1), 2026-10-15; Phase 7 LSTM; Phase 6 XGBoost; baselines; EDA; sensitivity analyses; leakage test.
+Done recently: export re-run (reproduced exactly), hour-of-day, robustness, rolling origin, uncertainty extension, answers to the research questions (2026-10-15); learning-curve diagnostic; pre-test stage 2 (widened XGBoost search; own LSTM tuning for L1), 2026-10-15; Phase 7 LSTM; Phase 6 XGBoost; baselines; EDA; sensitivity analyses; leakage test.
