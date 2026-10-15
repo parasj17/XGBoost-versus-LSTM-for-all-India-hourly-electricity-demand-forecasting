@@ -150,14 +150,15 @@ def main():
                 qq = conf_q(sc) if len(sc) >= 100 else q
                 lo_r[j], hi_r[j] = p_te[j] - qq, p_te[j] + qq
             variants["rolling conformal (last 720 h of known errors)"] = (lo_r, hi_r)
-            qf = ROOT / "data" / "interim" / "predictions" / f"xgb_quantile_h{h}.npz"
-            if m == "xgb_S4_full_A" and qf.exists():
+            qname = {"xgb_S4_full_A": ("xgb_quantile", "XGBoost quantile regression"), "lstm_L4_full_A": ("lstm_quantile", "LSTM quantile head")}.get(m)
+            qf = ROOT / "data" / "interim" / "predictions" / f"{qname[0]}_h{h}.npz" if qname else None
+            if qf is not None and qf.exists():
                 z = np.load(qf)
                 l_te, u_te, l_va, u_va = z["q05_te"], z["q95_te"], z["q05_va"], z["q95_va"]
-                variants["XGBoost quantile regression, raw 5%-95%"] = (l_te, u_te)
+                variants[f"{qname[1]}, raw 5%-95%"] = (l_te, u_te)
                 E = np.maximum(l_va - d["y_va"], d["y_va"] - u_va)
                 qc = conf_q(E)
-                variants["XGBoost quantile regression + CQR"] = (l_te - qc, u_te + qc)
+                variants[f"{qname[1]} + CQR"] = (l_te - qc, u_te + qc)
             for vname, (lo, hi) in variants.items():
                 cover, width, score = interval_stats(y, lo, hi)
                 rows.append((h, lab, vname, cover.mean(), width.mean(), score.mean()))
