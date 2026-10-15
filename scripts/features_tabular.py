@@ -24,6 +24,16 @@ HOLIDAYS = ROOT / "data" / "raw" / "calendar" / "dopt_central_gazetted_holidays.
 LAGS = [0, 1, 2, 3, 6, 12, 24, 48, 168]
 WEATHER = ["temp_c", "rel_humidity_pct", "dew_point_c", "precip_mm", "wind_speed_10m_kmh", "cloud_cover_pct", "ghi_wm2"]
 REGIONAL_T = ["temp_c_n", "temp_c_w", "temp_c_s", "temp_c_e", "temp_c_ne"]
+REGIONAL = ROOT / "data" / "processed" / "regional_holiday_daily.csv"
+FORECAST = ROOT / "data" / "interim" / "forecast_weather_national.csv"
+WEATHER_FC = ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "precipitation", "wind_speed_10m", "cloud_cover", "shortwave_radiation"]
+# extension feature sets (protocol deviation log 2026-10-15); kept apart so that existing runs are unchanged
+EXTENSION_SETS = {
+    "S2_ref": ["g0", "g1", "g2"],
+    "S6_forecastC": ["g0", "g1", "g2", "g3f"],
+    "S7_regionalFest": ["g0", "g1", "g2", "g2r"],
+    "S8_both": ["g0", "g1", "g2", "g2r", "g3f"],
+}
 FEATURE_SETS = {                      # cumulative ablation sets
     "S0_history": ["g0"],
     "S1_calendar": ["g0", "g1"],
@@ -99,6 +109,17 @@ def build_features(df: pd.DataFrame, h: int, groups, relative: bool) -> pd.DataF
         fw = festival_windows(pd.DatetimeIndex(T))
         for c in fw.columns:
             X[c] = fw[c].to_numpy()
+    if "g2r" in groups:                                   # regional (state) holidays of the target day, from the `holidays` package
+        reg = pd.read_csv(REGIONAL, parse_dates=["date"]).set_index("date")
+        td = pd.DatetimeIndex(T).normalize()
+        for c, name in (("share_public", "reg_share_public_T"), ("share_regional_only", "reg_share_only_T"), ("d_next_reg", "reg_d_next"), ("d_since_reg", "reg_d_since")):
+            X[name] = reg[c].reindex(td).to_numpy()
+    if "g3f" in groups:                                   # archived NWP forecast for the target hour (scenario C); gaps stay NaN
+        fc = pd.read_csv(FORECAST, parse_dates=["timestamp"]).set_index("timestamp")
+        lead = "f2" if h > 24 else "f1"                   # previous_day2 for 48 h, previous_day1 otherwise
+        for v in WEATHER_FC:
+            X[f"fc_{v}_T"] = fc[f"{lead}_{v}"].reindex(T).to_numpy()
+        X["fc_temp_minus_now"] = X["fc_temperature_2m_T"] - df["temp_c"].to_numpy()
     if "g3a" in groups:
         for c in WEATHER:
             X[f"{c}_t"] = df[c]
