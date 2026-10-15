@@ -1,0 +1,98 @@
+"""Regional (state-level) holiday features for the regional-festival extension (protocol deviation log, 2026-10-15).
+
+Source: the Python `holidays` package (public-holiday calendars of 36 Indian states/UTs; version recorded in the report). Each state calendar is
+weighted by Census-2011 population (data/raw/population). Features per calendar day (2021-01-01 .. 2025-12-31):
+  share_public         population share of states with ANY public holiday on the day (national ones included)
+  share_regional_only  population share of states with a public holiday that is neither in the verified DoPT central list nor in the library's national list
+  d_next_reg, d_since_reg   days to the next / since the last day with share_regional_only >= REG_THRESHOLD (5%, fixed in advance), clipped to 0..30
+Verification done here: the library's national dates are compared with the DoPT central list (2021-09 .. 2025-06); state calendars are NOT verified against
+state gazettes, and the library does not contain some large multi-day regional festivals (for example the Durga Puja windows), see the report.
+Outputs: data/processed/regional_holiday_daily.csv, reports/regional_holidays.md.   Usage: py scripts/build_regional_holiday_features.py
+"""
+from pathlib import Path
+
+import holidays
+import numpy as np
+import pandas as pd
+
+ROOT = Path(__file__).resolve().parents[1]
+DOPT = ROOT / "data" / "raw" / "calendar" / "dopt_central_gazetted_holidays.csv"
+POP = ROOT / "data" / "raw" / "population" / "census2011_state_population.csv"
+OUT = ROOT / "data" / "processed" / "regional_holiday_daily.csv"
+REPORT = ROOT / "reports" / "regional_holidays.md"
+REG_THRESHOLD = 0.05
+YEARS = range(2021, 2026)
+CODE2NAME = {"AN": "Andaman and Nicobar Islands", "AP": "Andhra Pradesh", "AR": "Arunachal Pradesh", "AS": "Assam", "BR": "Bihar", "CG": "Chhattisgarh",
+             "CH": "Chandigarh", "DH": "Dadra and Nagar Haveli and Daman and Diu", "DL": "Delhi", "GA": "Goa", "GJ": "Gujarat", "HP": "Himachal Pradesh",
+             "HR": "Haryana", "JH": "Jharkhand", "JK": "Jammu and Kashmir", "KA": "Karnataka", "KL": "Kerala", "LA": "Ladakh", "LD": "Lakshadweep",
+             "MH": "Maharashtra", "ML": "Meghalaya", "MN": "Manipur", "MP": "Madhya Pradesh", "MZ": "Mizoram", "NL": "Nagaland", "OD": "Odisha",
+             "PB": "Punjab", "PY": "Puducherry", "RJ": "Rajasthan", "SK": "Sikkim", "TN": "Tamil Nadu", "TR": "Tripura", "TS": "Telangana",
+             "UK": "Uttarakhand", "UP": "Uttar Pradesh", "WB": "West Bengal"}
+
+
+def main():
+    pop = pd.read_csv(POP).set_index("state_or_ut")["population_2011"]
+    assert set(CODE2NAME.values()) <= set(pop.index), "unmapped state"
+    w = pd.Series({c: float(pop[n]) for c, n in CODE2NAME.items()})
+    w = w / w.sum()
+    days = pd.date_range("2021-01-01", "2025-12-31", freq="D")
+    dopt = pd.read_csv(DOPT, parse_dates=["date"])
+    dopt_set = set(dopt["date"])
+    lib_nat = holidays.India(years=YEARS)
+    nat_set = {pd.Timestamp(d) for d in lib_nat}
+    any_h = pd.DataFrame(0.0, index=days, columns=list(CODE2NAME))
+    reg_h = pd.DataFrame(0.0, index=days, columns=list(CODE2NAME))
+    names = {}
+    for c in CODE2NAME:
+        cal = holidays.India(subdiv=c, years=YEARS)
+        for d, n in cal.items():
+            ts = pd.Timestamp(d)
+            if ts not in any_h.index:
+                continue
+            any_h.loc[ts, c] = 1.0
+            if ts not in dopt_set and ts not in nat_set:
+                reg_h.loc[ts, c] = 1.0
+                names.setdefault(ts, []).append((c, n))
+    out = pd.DataFrame({"share_public": any_h.mul(w, axis=1).sum(axis=1), "share_regional_only": reg_h.mul(w, axis=1).sum(axis=1)})
+    big = out.index[out["share_regional_only"] >= REG_THRESHOLD].to_numpy()
+    def dist(day, arr, forward):
+        i = np.searchsorted(arr, day, side="left" if forward else "right")
+        if forward:
+            return np.where(i < len(arr), (arr[np.minimum(i, len(arr) - 1)] - day) / np.timedelta64(1, "D"), np.nan)
+        j = i - 1
+        return np.where(j >= 0, (day - arr[np.maximum(j, 0)]) / np.timedelta64(1, "D"), np.nan)
+    dv = out.index.to_numpy()
+    out["d_next_reg"] = np.clip(dist(dv, big, True), 0, 30)
+    out["d_since_reg"] = np.clip(dist(dv, big, False), 0, 30)
+    OUT.parent.mkdir(parents=True, exist_ok=True)
+    out.index.name = "date"
+    out.to_csv(OUT, float_format="%.5f")
+    # ---- cross-check report
+    rng = (dopt["date"] >= "2021-09-01") & (dopt["date"] <= "2025-06-24")
+    d, l = dopt[rng], pd.DataFrame({"date": sorted(nat_set)})
+    l = l[(l["date"] >= "2021-09-01") & (l["date"] <= "2025-06-24")]
+    only_dopt = d[~d["date"].isin(l["date"])][["date", "holiday_name"]]
+    only_lib = [(str(x.date()), lib_nat.get(x)) for x in l["date"] if x not in dopt_set]
+    top = out.sort_values("share_regional_only", ascending=False).head(12)
+    yr = out.groupby(out.index.year).apply(lambda g: int((g["share_regional_only"] >= REG_THRESHOLD).sum()))
+    md = ["# Regional holiday features (generated by `scripts/build_regional_holiday_features.py`)", "",
+          f"Source: Python `holidays` package {holidays.__version__}, public-holiday calendars of 36 states/UTs, weighted by Census-2011 population. Output: `data/processed/regional_holiday_daily.csv`.", "",
+          "## Verification performed", "",
+          f"- Library national holidays versus the verified DoPT list (2021-09 to 2025-06): DoPT {d['date'].nunique()} dates, library {l['date'].nunique()} dates, common {len(set(d['date']) & set(l['date']))}. "
+          "In the DoPT list but not in the library's national list (library treats them as state-level): " + "; ".join(f"{r.date.date()} {r.holiday_name}" for r in only_dopt.itertuples()) + ". "
+          "In the library but not in the DoPT list: " + "; ".join(f"{a} {b}" for a, b in only_lib) + ". No festival date in both lists differs.",
+          "- Spot checks of state festival dates in 2022 (Pongal 14-16 Jan, Onam 8 Sep, Chhath Puja 30 Oct, Ugadi/Gudi Padwa 2 Apr, Rabindra Jayanti 9 May) agree with the calendars I know; they were **not** checked against state gazettes.", "",
+          "## Known limitations", "",
+          "- The library lists a small number of state-specific public holidays per state and misses multi-day regional festival windows (for example Durga Puja in West Bengal appears only through the national Dussehra date); the `optional` category only adds pan-India festival days that are identical for every state and was not used.",
+          "- Weights are 2011 census populations, not electricity consumption.", "",
+          f"## Resulting features", "",
+          f"Days per calendar year with at least {REG_THRESHOLD:.0%} of the population in states with a regional-only holiday: " + ", ".join(f"{y}: {n}" for y, n in yr.items()) + ".", "",
+          "Largest regional-only days:", "", "| date | population share | states and holidays |", "|---|---:|---|"]
+    for ts, r in top.iterrows():
+        md.append(f"| {ts.date()} | {100 * r['share_regional_only']:.1f}% | " + "; ".join(f"{c}: {n}" for c, n in names.get(ts, [])[:6]) + " |")
+    REPORT.write_text(chr(10).join(md) + chr(10), encoding="utf-8")
+    print(chr(10).join(md[:12]))
+
+
+if __name__ == "__main__":
+    main()
