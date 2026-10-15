@@ -26,7 +26,8 @@ WEATHER = ["temp_c", "rel_humidity_pct", "dew_point_c", "precip_mm", "wind_speed
 REGIONAL_T = ["temp_c_n", "temp_c_w", "temp_c_s", "temp_c_e", "temp_c_ne"]
 REGIONAL = ROOT / "data" / "processed" / "regional_holiday_daily.csv"
 FORECAST = ROOT / "data" / "interim" / "forecast_weather_national.csv"
-WEATHER_FC = ["temperature_2m", "relative_humidity_2m", "dew_point_2m", "precipitation", "wind_speed_10m", "cloud_cover", "shortwave_radiation"]
+# The archive holds only temperature for the whole period; all other variables are empty before about 2024-02 (checked 2026-10-15), so only temperature is used.
+WEATHER_FC = ["temperature_2m"]
 # extension feature sets (protocol deviation log 2026-10-15); kept apart so that existing runs are unchanged
 EXTENSION_SETS = {
     "S2_ref": ["g0", "g1", "g2"],
