@@ -4,6 +4,8 @@ Research objective: forecast all-India hourly electricity demand 1, 6, 24 and 48
 
 **Current phase: experiments finished (validation and the single test run); novelty check and writing remain.** See `docs/project_plan.md` (living plan, decision log, next actions) and `docs/experiment_protocol.md` (frozen protocol, deviation log).
 
+> **Read first:** `docs/limitations.md` lists the limits that apply to every result (one test year, optimistic validation numbers, tuning budgets, repeated use of the test period, unverified inputs).
+
 ## Results in brief (test period 2024-07-01 to 2025-06-24, MAE in MW)
 | Model | 1 h | 6 h | 24 h | 48 h |
 |---|---:|---:|---:|---:|

@@ -1,5 +1,7 @@
 # Answers to the research questions (written 2026-10-15, after the single test run)
 
+> **Read `docs/limitations.md` first.** The main limits: one test year; validation numbers are optimistic; tuning budgets differed (an equal-budget LSTM was added later, see `reports/lstm_stage3.md`); the test period was reused for declared secondary analyses; some inputs are unverified.
+
 Evidence base: test period 2024-07-01 to 2025-06-24 (one run, 8,611 valid hours per horizon), validation 2024-H1, rolling-origin folds on 2023. Every number below is in `reports/test_results.md`, `reports/ablation_paired.md`, `reports/uncertainty.md`, `reports/rolling_origin.md`, `reports/hour_of_day.md`, `reports/robustness.md` or `reports/validation_summary.md`. All statements are about all-India hourly demand from this dataset, one test year, one hardware setup, and the tuning budgets stated in the protocol (XGBoost 90 trials per horizon, LSTM 12 + 12). "Not distinguishable" means the 95% block-bootstrap interval includes zero. Nothing here is a causal claim.
 
 ## Central question: how do XGBoost and LSTM compare?
