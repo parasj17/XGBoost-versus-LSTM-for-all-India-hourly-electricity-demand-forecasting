@@ -36,11 +36,11 @@ Errors rise from validation to test at 6-48 h for every model (XGBoost +10%, +18
 ## Findings that did NOT carry over from validation
 - On validation, past weather and solar/wind lowered XGBoost's 24 h and 48 h error by about 4-5%. On test they do not: S2 (holidays) -> S3 (+ past weather) -> S4 (+ solar/wind): 24 h 3,705 -> 3,713 -> 3,728; 48 h 5,157 -> 5,139 -> 5,158 MW. Past weather and generation add nothing measurable on the test period.
 - **Oracle** weather (the actual weather at the target hour, not available in reality) does help: 24 h 3,728 -> 3,510 MW (-5.9%), 48 h 5,158 -> 4,564 MW (-11.5%). A perfect weather forecast would therefore be worth something at longer horizons; past weather is not.
-- Holiday/festival features (S1 -> S2): 6 h 2,738 -> 2,705, 24 h 3,784 -> 3,705, 48 h 5,213 -> 5,157 MW, i.e. 1-2% gains, consistent in sign across horizons; no gain at 1 h. Error within one day of a major festival is about twice the average for every model (e.g. 24 h XGBoost 6,214 MW vs 3,728 MW overall; n = 360 hours, about 15 days, so this is a small sample). At 48 h the LSTMs and ridge do much worse around festivals (9,000-10,100 MW) than XGBoost (6,524 MW).
+- Holiday/festival features (S1 -> S2): 6 h 2,738 -> 2,705, 24 h 3,784 -> 3,705, 48 h 5,213 -> 5,157 MW, i.e. 1-2% gains, consistent in sign across horizons; no gain at 1 h. Error within one day of a major festival is clearly elevated: for XGBoost 1.3 to 1.7 times the overall error at 6-48 h (e.g. 24 h 6,214 MW vs 3,728 MW overall; not elevated at 1 h); n = 360 hours, about 15 days, so this is a small sample. At 48 h the LSTMs and ridge do much worse around festivals (9,000-10,100 MW, 1.7-1.8 times) than XGBoost (6,524 MW).
 - The LSTM per-seed spread is wide at 6 h (L1: 2,904-3,335 MW), i.e. the headline mean-of-seeds number hides large run-to-run variation.
 
 ## Caveats
 - 28.8% of test hours are at or above the training 95th percentile (demand has grown), so the "peak hours" subset is a large share of the test period and is not a rare-event measure.
 - Tuning budgets differ (XGBoost 90 trials per horizon; LSTM 12 + 12) and the LSTM was tuned for 10-epoch trials; any statement about "LSTM vs XGBoost" applies to this setup.
-- One test year, one hardware setup, one train/validation/test split; the rolling-origin stability check (task 8.4) is still to be done on train+validation data.
+- One test year, one hardware setup, one train/validation/test split; rolling-origin folds on 2023 are in `reports/rolling_origin.md` (the XGBoost-vs-ridge ranking at 6 h flips between folds).
 - Refit times (3 seeds, laptop CPU) were 5-62 s for XGBoost S4 and 35-522 s for LSTM L4 (L1: 113-953 s); LSTM refits cost roughly 4 to 45 times more depending on horizon and variant.
