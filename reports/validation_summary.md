@@ -1,6 +1,6 @@
 # Validation-period summary: baselines, XGBoost, LSTM (2026-10-14)
 
-Validation targets 2024-01-01 to 2024-06-30 (4,367 valid samples per horizon, identical for all models). Scenario A (no future weather). MAE in MW. The test period (2024-07-01 onward) has not been used. All numbers are mildly optimistic because early stopping and hyper-parameter selection used the validation period; XGBoost had 30 tuning trials per horizon, the LSTM 12 (documented in the protocol deviation log), so the comparison is not budget-equal.
+Validation targets 2024-01-01 to 2024-06-30 (4,367 valid samples per horizon, identical for all models). Scenario A (no future weather). MAE in MW. (Written before the test run: at that time the test period, 2024-07-01 onward, had not been used.) All numbers are mildly optimistic because early stopping and hyper-parameter selection used the validation period; XGBoost had 30 tuning trials per horizon, the LSTM 12 (documented in the protocol deviation log), so the comparison is not budget-equal.
 
 | Model | 1 h | 6 h | 24 h | 48 h |
 |---|---:|---:|---:|---:|
@@ -31,7 +31,7 @@ Sources: `reports/tables/baselines_validation.md`, `xgboost_validation.md`, `lst
 | Final/ablation fits | 144 fits in 16.6 min (4-15 s per fit for the headline set) | 36 fits in 75.0 min (32-277 s per fit for the headline set) |
 | Model size | 0.5-1.6 MB | 43-111 KB (10-27 thousand parameters) |
 | Peak working set | about 410 MB | about 730 MB |
-| Inference | 22-56 ms for 4,367 rows | 60-164 ms for 1,024 windows (roughly 10-30 times more per sample) |
+| Inference | 22-56 ms for 4,367 rows | 60-164 ms for 1,024 windows (roughly 11 to 20 times more per sample) |
 Single-sample latencies (XGBoost 12.6-13 ms, LSTM 1.2-1.9 ms) were measured through different Python interfaces and are dominated by overhead, so they are not comparable.
 
 ---

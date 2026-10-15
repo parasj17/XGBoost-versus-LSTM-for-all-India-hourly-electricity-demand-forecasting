@@ -22,7 +22,7 @@ Source: `reports/test_results.md` (full tables, paired intervals, breakdowns), `
 ## What the test period supports
 - XGBoost beats ridge at 6, 24 and 48 h (intervals exclude zero). At 1 h XGBoost and ridge are not distinguishable by the bootstrap interval; the point estimate favours ridge (the Diebold-Mariano statistic points the same way but understates uncertainty because hourly errors are strongly autocorrelated). At 1 h XGBoost's RMSE (2,140 MW) is much larger than ridge's (1,562 MW) while MAE is similar, so XGBoost has some larger errors; in winter and pre-monsoon its 1 h error is above ridge's (e.g. winter 1,574 vs 1,205 MW). The cause was not investigated.
 - The LSTM is worse than XGBoost at 1 h and 6 h (intervals exclude zero) and **not distinguishable from XGBoost at 24 h and 48 h**. Both LSTM variants beat ridge at 24 h and 48 h; at 6 h they are not distinguishable from ridge.
-- Skill against the best naive baseline (ridge, XGBoost and the LSTMs): about 75% at 1 h (ridge and XGBoost; 61-64% for the LSTMs), 41-50% at 6 h, 22-31% at 24 h and 20-26% at 48 h.
+- Skill against the best naive baseline (ridge, XGBoost and the LSTMs): about 74-75% at 1 h (ridge and XGBoost; 62-64% for the LSTMs), 41-49% at 6 h, 22-31% at 24 h and 20-26% at 48 h.
 
 ## Validation versus test
 | Model (MAE, MW) | 1 h val -> test | 6 h | 24 h | 48 h |
@@ -36,7 +36,7 @@ Errors rise from validation to test at 6-48 h for every model (XGBoost +10%, +18
 ## Findings that did NOT carry over from validation
 - On validation, past weather and solar/wind lowered XGBoost's 24 h and 48 h error by about 4-5%. On test they do not: S2 (holidays) -> S3 (+ past weather) -> S4 (+ solar/wind): 24 h 3,705 -> 3,713 -> 3,728; 48 h 5,157 -> 5,139 -> 5,158 MW. Past weather and generation add nothing measurable on the test period.
 - **Oracle** weather (the actual weather at the target hour, not available in reality) does help: 24 h 3,728 -> 3,510 MW (-5.9%), 48 h 5,158 -> 4,564 MW (-11.5%). A perfect weather forecast would therefore be worth something at longer horizons; past weather is not.
-- Holiday/festival features (S1 -> S2): 6 h 2,738 -> 2,705, 24 h 3,784 -> 3,705, 48 h 5,213 -> 5,157 MW, i.e. 1-2% gains, consistent in sign across horizons; no gain at 1 h. Error within one day of a major festival is clearly elevated: for XGBoost 1.3 to 1.7 times the overall error at 6-48 h (e.g. 24 h 6,214 MW vs 3,728 MW overall; not elevated at 1 h); n = 360 hours, about 15 days, so this is a small sample. At 48 h the LSTMs and ridge do much worse around festivals (9,000-10,100 MW, 1.7-1.8 times) than XGBoost (6,524 MW).
+- Holiday/festival features (S1 -> S2): 6 h 2,738 -> 2,705, 24 h 3,784 -> 3,705, 48 h 5,213 -> 5,157 MW, i.e. 1-2% gains, consistent in sign across horizons; no gain at 1 h. Error within one day of a major festival is clearly elevated: for XGBoost 1.3 to 1.7 times the overall error at 6-48 h (e.g. 24 h 6,214 MW vs 3,728 MW overall; not elevated at 1 h); n = 360 hours, about 15 days, so this is a small sample. At 48 h the LSTMs and ridge do much worse around festivals (9,000-10,100 MW, 1.7-1.9 times) than XGBoost (6,524 MW).
 - The LSTM per-seed spread is wide at 6 h (L1: 2,904-3,335 MW), i.e. the headline mean-of-seeds number hides large run-to-run variation.
 
 ## Caveats
