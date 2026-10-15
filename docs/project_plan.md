@@ -30,10 +30,10 @@ Legend: `[x]` done · `[ ]` to do · `[~]` partly done (the row says what remain
 | Workspace and structure | `[x]` created, `.gitignore`, `requirements.txt`, README |
 | Electricity data (Mendeley) | `[x]` downloaded, extracted, fully audited — all-India series, 2021-09-01 → 2025-06-24, 33,432 hours, needs cleaning |
 | Weather (Open-Meteo ERA5) | `[x]` 12 cities downloaded, 33,432 rows each, 0 nulls; aggregated to national (equal-weight) in the canonical dataset |
-| Calendar/holidays | `[~]` time features built; 85 central gazetted holidays sourced from and verified against the DoPT memoranda (0 differences); regional festivals not collected |
+| Calendar/holidays | `[x]` time features built; 85 central gazetted holidays sourced from and verified against the DoPT memoranda (0 differences); regional festivals added as an exploratory extension |
 | Zenodo daily state data | `[x]` 42 files, MD5-verified; used to validate Mendeley (r = 0.997); separate daily study optional |
 | Literature | `[x]` 8 papers recorded and DOIs checked; novelty search still pending |
-| Cleaning / canonical dataset | `[~]` demand/solar/wind cleaned (`india_hourly_demand_clean.csv`); weather/calendar merge pending |
+| Cleaning / canonical dataset | `[x]` cleaned hourly demand/solar/wind and the merged canonical dataset (`india_hourly_canonical.csv`) |
 | Baselines / models | `[x]` baselines (Phase 5), XGBoost (Phase 6) and LSTM (Phase 7) done on validation; test set untouched |
 
 ---
@@ -62,10 +62,10 @@ Legend: `[x]` done · `[ ]` to do · `[~]` partly done (the row says what remain
 | 1.3 | Validate weather files: time grid, ranges, units | S | `[x]` grid OK, ranges plausible |
 | 1.4 | Record weather units in the dictionary (wind in **km/h**, GHI W/m² preceding-hour mean, precipitation mm preceding hour, T in °C) and fix the wind-speed column name | S | `[x]` done 2026-10-13, units verified from the API |
 | 1.5 | Verify holiday CSV against the official DoPT memoranda | S | `[x]` done 2026-10-13: all 5 years (85 rows) compared with Annexure-I of the DoPT OMs; 0 differences. 2023 from the official doptcirculars.nic.in PDF; 2021/2022/2024/2025 from scanned OM PDFs hosted on staffnews.in |
-| 1.6 | Decide on regional/state festivals (see D-08); if yes, collect with citations | M | `[ ]` |
+| 1.6 | Decide on regional/state festivals (see D-08); if yes, collect with citations | M | `[x]` deferred (D-08), then done as an exploratory extension 2026-10-16: state-level holidays from the `holidays` package (`reports/regional_holidays.md`); source incomplete and not checked against state gazettes; no benefit found |
 | 1.7 | Spot-check Zenodo per-state weather against Open-Meteo for one state and a few days | S | `[x]` 2026-10-14: Delhi daily mean temperature, 969 overlapping days: correlation 0.999, mean difference -0.19 C, MAE 0.31 C (0.22 C on a UTC day) — consistent with ERA5-derived data as assumed |
 | 1.8 | Investigate availability of **archived weather forecasts** for scenario C | M | `[x]` done 2026-10-13, see decision D-13 below |
-| 1.9 | Investigate any **solar/wind forecast** availability (otherwise G4 uses past values only) | S | `[ ]` |
+| 1.9 | Investigate any **solar/wind forecast** availability (otherwise G4 uses past values only) | S | `[ ]` not investigated; by design G4 uses past values only, so this was not needed for the frozen results |
 
 **GATE 1:** all raw sources documented in `reports/dataset_inventory.md` and `references.md`; the three open questions (1.4, 1.5, D-08) are resolved or consciously deferred.
 
@@ -79,7 +79,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 |---|---|---|---|
 | 2.1 | Freeze cleaning rules (zeros → missing; plausibility bounds; dip-and-recovery; isolated-point; stuck values; solar clipping) | M | `[x]` frozen 2026-10-13, see data dictionary. Night-baseline correction deferred to Phase 3 |
 | 2.2 | Write `scripts/build_hourly_dataset.py`: HH:00 snapshots from all 29 workbooks, drop footer rows, apply rules, add `demand_quality_flag` and `source_regime` | L | `[x]` output `data/processed/india_hourly_demand_clean.csv` |
-| 2.3 | Gap handling: interpolate ≤ 3 h only; longer gaps kept missing; decide how windows touching gaps are excluded from training/evaluation | M | `[~]` interpolation done (49 h); 12 h remain missing; the exclusion rule for windows goes in the experiment protocol |
+| 2.3 | Gap handling: interpolate ≤ 3 h only; longer gaps kept missing; decide how windows touching gaps are excluded from training/evaluation | M | `[x]` interpolation (49 h), 12 h left missing; samples are valid only if the target is observed and all inputs present (protocol section 3) |
 | 2.4 | Produce a cleaning log: hours affected per rule, per year | S | `[x]` `reports/cleaning_log.md` |
 | 2.5 | Plots before/after cleaning (demand, outages) and the solar night baseline | S | `[x]` `reports/figures/cleaning_before_after.png`, `reports/figures/solar_night_baseline.png` |
 | 2.6 | Sensitivity file: hourly-mean target for 2021–2023 | M | `[x]` `data/interim/demand_hourmean_2021_2023.csv`, `reports/hourmean_sensitivity.md`; ridge result in `reports/sensitivity_summary.md` |
@@ -93,12 +93,12 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 
 | # | Task | Size | Status |
 |---|---|---|---|
-| 3.1 | Choose aggregation weights and **document the source** (Census 2011 population per grid region, or regional electricity consumption from CEA/Grid-India); decision D-03 | M | `[ ]` |
+| 3.1 | Choose aggregation weights and **document the source** (Census 2011 population per grid region, or regional electricity consumption from CEA/Grid-India); decision D-03 | M | `[x]` equal weights as baseline; population and consumption weights computed and compared (`reports/weather_weights.md`, `reports/sensitivity_summary.md`) |
 | 3.2 | Build national weather: region mean → weighted national mean; also keep 5 regional temperature columns | M | `[x]` equal-weight baseline built (D-03) |
-| 3.3 | Derived weather features: CDD/HDD (base temperature chosen on **training data only**), heat index/apparent temperature, temperature lags | M | `[ ]` deliberately left to the modelling feature pipeline (parameters must be fit on training data only) |
+| 3.3 | Derived weather features: CDD/HDD (base temperature chosen on **training data only**), heat index/apparent temperature, temperature lags | M | `[ ]` not done by design: CDD/HDD and heat index were dropped because trees learn temperature thresholds themselves (protocol deviation log); temperature lags and rolling means are in the feature pipeline |
 | 3.4 | Align weather timestamps with demand snapshots; handle the preceding-hour (precipitation, radiation) vs instant offset deliberately (D-09) | S | `[x]` no shift needed (D-09) |
 | 3.5 | Rebuild calendar features for the final range; add festival-window features (days to/from major festivals) | S | `[x]` festival/holiday windows (days to next / since last) added in `features_tabular.py` group g2 |
-| 3.6 | Merge into the canonical dataset; update the data dictionary (every column, unit, source, known-at-forecast-time flag) | M | `[~]` merged: `data/processed/india_hourly_canonical.csv` (33,432 × 43), log in `reports/canonical_dataset_log.md`; dictionary updated |
+| 3.6 | Merge into the canonical dataset; update the data dictionary (every column, unit, source, known-at-forecast-time flag) | M | `[x]` `data/processed/india_hourly_canonical.csv` (33,432 rows), `reports/canonical_dataset_log.md`, data dictionary updated |
 | 3.7 | Sensitivity: equal vs population vs consumption weights; national mean vs regional columns | M | `[x]` weights in `reports/weather_weights.md`; ridge validation MAE changes by at most 41 MW (`reports/sensitivity_summary.md`) — the choice of weights does not matter at this level. National-mean vs regional temperature columns remains to be tested with XGBoost |
 
 **GATE 3:** canonical dataset with all feature groups and dictionary complete; **splits frozen** (D-04); evaluation protocol written (Phase 4).
@@ -111,8 +111,8 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 |---|---|---|---|
 | 4.1 | Write `docs/experiment_protocol.md`: exact horizons definition, splits, metrics formulas, scenarios A/B/C, baselines, ablation list, random seeds, logging schema | M | `[x]` written and frozen 2026-10-13 |
 | 4.2 | Exploratory analysis **on the training period only**: daily/weekly/annual profiles, trend/growth, temperature–demand curve, festival and holiday effects, autocorrelation, solar/wind relations | L | `[x]` `reports/eda_training_period.md` + `reports/figures/eda_training_period.png` (2026-10-13) |
-| 4.3 | Decide the treatment of trend/non-stationarity (levels vs ratios to lag; tree models cannot extrapolate beyond the training range) — D-07 | M | `[ ]` |
-| 4.4 | Build the experiment-logging utility (JSON/CSV: config, git state, seeds, hardware, timings) | M | `[ ]` |
+| 4.3 | Decide the treatment of trend/non-stationarity (levels vs ratios to lag; tree models cannot extrapolate beyond the training range) — D-07 | M | `[x]` frozen 2026-10-14: ratio to the 24 h seasonal anchor, chosen by a rule fixed in advance on validation |
+| 4.4 | Build the experiment-logging utility (JSON/CSV: config, git state, seeds, hardware, timings) | M | `[x]` implemented inside each run script: one JSON line per fit with git commit, dataset hash, seeds, hardware, timings (`reports/tables/*.jsonl`); not a separate utility |
 
 ---
 
@@ -177,10 +177,10 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | # | Task | Size | Status |
 |---|---|---|---|
 | 10.1 | Broader literature search for national-scale Indian forecasting (ML/DL, weather, festivals); update the research gap honestly | L | `[ ]` (before any publication claim) |
-| 10.2 | Computational-efficiency table from the logs | S | `[ ]` |
-| 10.3 | Figures and tables generated by scripts, saved to `reports/figures/` and `reports/tables/` | M | `[ ]` |
+| 10.2 | Computational-efficiency table from the logs | S | `[ ]` the numbers exist in the logs and are quoted in `reports/validation_summary.md` and `reports/research_question_answers.md`; one consolidated table still to be generated |
+| 10.3 | Figures and tables generated by scripts, saved to `reports/figures/` and `reports/tables/` | M | `[~]` most tables and four figures exist; final paper figures not yet selected |
 | 10.4 | Write report/paper: data (with documented limitations), method, results, threats to validity, reproducibility appendix | L | `[ ]` |
-| 10.5 | Clean the repository: README with exact reproduction commands, requirements pinned, licence/attribution notes | S | `[ ]` |
+| 10.5 | Clean the repository: README with exact reproduction commands, requirements pinned, licence/attribution notes | S | `[~]` README rewritten 2026-10-15; requirements are lower bounds not pinned versions; licence/attribution notes partly in `references.md` |
 
 ---
 
