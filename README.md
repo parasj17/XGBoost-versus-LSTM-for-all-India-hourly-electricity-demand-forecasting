@@ -58,14 +58,17 @@ py scripts\run_rolling_origin.py               # stability on 2023 folds (no val
 py scripts\run_quantile_xgb.py                 # XGBoost quantile models (intervals)
 py scripts\analyze_predictions.py              # hour of day, robustness, 90% intervals
 py scripts\analyze_ablation_ci.py              # paired feature-group effects with intervals
-py scriptsun_quantile_lstm.py               # LSTM quantile-head intervals
+py scripts
+un_quantile_lstm.py               # LSTM quantile-head intervals
 ```
 Exploratory extensions (each declared in the protocol first; test runs are single-use with lock files):
 ```powershell
 py scriptsetch_forecast_weather.py            # archived GFS forecasts (scenario C)
 py scriptsuild_regional_holiday_features.py   # state-level holidays
-py scriptsun_extensions_xgb.py [--with-test]  # forecast temperature and regional holidays
-py scriptsun_daily_regional_study.py [--with-test]  # Zenodo daily study (direct vs bottom-up)
+py scripts
+un_extensions_xgb.py [--with-test]  # forecast temperature and regional holidays
+py scripts
+un_daily_regional_study.py [--with-test]  # Zenodo daily study (direct vs bottom-up)
 ```
 Scripts use paths relative to the project root and have `--help` or a docstring.
 
