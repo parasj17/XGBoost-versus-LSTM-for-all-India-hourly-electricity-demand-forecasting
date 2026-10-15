@@ -58,12 +58,22 @@ py scripts\run_rolling_origin.py               # stability on 2023 folds (no val
 py scripts\run_quantile_xgb.py                 # XGBoost quantile models (intervals)
 py scripts\analyze_predictions.py              # hour of day, robustness, 90% intervals
 py scripts\analyze_ablation_ci.py              # paired feature-group effects with intervals
+py scriptsun_quantile_lstm.py               # LSTM quantile-head intervals
+```
+Exploratory extensions (each declared in the protocol first; test runs are single-use with lock files):
+```powershell
+py scriptsetch_forecast_weather.py            # archived GFS forecasts (scenario C)
+py scriptsuild_regional_holiday_features.py   # state-level holidays
+py scriptsun_extensions_xgb.py [--with-test]  # forecast temperature and regional holidays
+py scriptsun_daily_regional_study.py [--with-test]  # Zenodo daily study (direct vs bottom-up)
 ```
 Scripts use paths relative to the project root and have `--help` or a docstring.
 
 ## Key documents
 - `docs/project_plan.md`, `docs/experiment_protocol.md`: plan, frozen protocol, deviations log.
 - `reports/validation_summary.md`, `reports/test_summary.md`, `reports/research_question_answers.md`: results.
+- `docs/novelty_assessment.md`: preliminary novelty check (web search only).
+- `reports/extensions_xgb_test.md`, `reports/regional_daily_study_test.md`, `reports/regional_holidays.md`: extension results.
 - `reports/test_results.md`: full test tables (paired comparisons, breakdowns); `reports/uncertainty.md`, `reports/rolling_origin.md`, `reports/hour_of_day.md`, `reports/robustness.md`, `reports/ablation_paired.md`, `reports/learning_curve.md`.
 
 ## Data licences
