@@ -1,0 +1,122 @@
+{
+ "1": {
+  "seeds": [
+   {
+    "seed": 0,
+    "epochs": 10,
+    "fit_s": 188.7,
+    "val_pinball_z": 0.037951815873384476,
+    "raw_val_coverage": 0.8552782230364094,
+    "inference_s": 1.78
+   },
+   {
+    "seed": 1,
+    "epochs": 13,
+    "fit_s": 326.1,
+    "val_pinball_z": 0.03546667844057083,
+    "raw_val_coverage": 0.8117700938859629,
+    "inference_s": 4.55
+   },
+   {
+    "seed": 2,
+    "epochs": 18,
+    "fit_s": 440.9,
+    "val_pinball_z": 0.033476803451776505,
+    "raw_val_coverage": 0.8523013510419052,
+    "inference_s": 2.42
+   }
+  ],
+  "mean_raw_val_coverage_of_seed_average": 0.8644378291733456,
+  "total_fit_s": 971.9
+ },
+ "6": {
+  "seeds": [
+   {
+    "seed": 0,
+    "epochs": 8,
+    "fit_s": 205.8,
+    "val_pinball_z": 0.07261041551828384,
+    "raw_val_coverage": 0.8850469429814518,
+    "inference_s": 4.28
+   },
+   {
+    "seed": 1,
+    "epochs": 11,
+    "fit_s": 554.0,
+    "val_pinball_z": 0.072017140686512,
+    "raw_val_coverage": 0.8378749713762308,
+    "inference_s": 5.11
+   },
+   {
+    "seed": 2,
+    "epochs": 8,
+    "fit_s": 343.4,
+    "val_pinball_z": 0.0722212940454483,
+    "raw_val_coverage": 0.8694756125486605,
+    "inference_s": 2.97
+   }
+  ],
+  "mean_raw_val_coverage_of_seed_average": 0.8916876574307305,
+  "total_fit_s": 1122.0
+ },
+ "24": {
+  "seeds": [
+   {
+    "seed": 0,
+    "epochs": 13,
+    "fit_s": 348.8,
+    "val_pinball_z": 0.07936140894889832,
+    "raw_val_coverage": 0.8461186168994733,
+    "inference_s": 2.48
+   },
+   {
+    "seed": 1,
+    "epochs": 10,
+    "fit_s": 272.3,
+    "val_pinball_z": 0.07886087894439697,
+    "raw_val_coverage": 0.8864208839019923,
+    "inference_s": 1.65
+   },
+   {
+    "seed": 2,
+    "epochs": 10,
+    "fit_s": 156.9,
+    "val_pinball_z": 0.07826878875494003,
+    "raw_val_coverage": 0.9001602931073964,
+    "inference_s": 1.26
+   }
+  ],
+  "mean_raw_val_coverage_of_seed_average": 0.8900847263567666,
+  "total_fit_s": 786.3
+ },
+ "48": {
+  "seeds": [
+   {
+    "seed": 0,
+    "epochs": 6,
+    "fit_s": 104.3,
+    "val_pinball_z": 0.08253417909145355,
+    "raw_val_coverage": 0.9093198992443325,
+    "inference_s": 2.26
+   },
+   {
+    "seed": 1,
+    "epochs": 7,
+    "fit_s": 92.9,
+    "val_pinball_z": 0.08169902116060257,
+    "raw_val_coverage": 0.8980993817265858,
+    "inference_s": 1.24
+   },
+   {
+    "seed": 2,
+    "epochs": 7,
+    "fit_s": 72.4,
+    "val_pinball_z": 0.07963120937347412,
+    "raw_val_coverage": 0.8893977558964965,
+    "inference_s": 1.36
+   }
+  ],
+  "mean_raw_val_coverage_of_seed_average": 0.9129837416991069,
+  "total_fit_s": 277.0
+ }
+}

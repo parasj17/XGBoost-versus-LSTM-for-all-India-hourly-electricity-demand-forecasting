@@ -12,6 +12,8 @@ Calibration uses validation residuals only (or, for the rolling variant, errors 
 | 1 | LSTM L4 | split conformal (absolute) | 88.6% | 6,783 | 10,189 |
 | 1 | LSTM L4 | split conformal (scaled by anchor) | 88.3% | 6,502 | 9,966 |
 | 1 | LSTM L4 | rolling conformal (last 720 h of known errors) | 89.7% | 7,026 | 10,007 |
+| 1 | LSTM L4 | LSTM quantile head, raw 5%-95% | 84.8% | 5,947 | 10,246 |
+| 1 | LSTM L4 | LSTM quantile head + CQR | 88.1% | 6,535 | 10,041 |
 | 1 | ridge | split conformal (absolute) | 90.7% | 4,649 | 6,958 |
 | 1 | ridge | split conformal (scaled by anchor) | 90.0% | 4,395 | 6,853 |
 | 1 | ridge | rolling conformal (last 720 h of known errors) | 89.7% | 4,485 | 6,924 |
@@ -23,6 +25,8 @@ Calibration uses validation residuals only (or, for the rolling variant, errors 
 | 6 | LSTM L4 | split conformal (absolute) | 90.3% | 13,569 | 21,004 |
 | 6 | LSTM L4 | split conformal (scaled by anchor) | 89.7% | 13,082 | 20,769 |
 | 6 | LSTM L4 | rolling conformal (last 720 h of known errors) | 89.9% | 13,153 | 20,987 |
+| 6 | LSTM L4 | LSTM quantile head, raw 5%-95% | 89.4% | 13,015 | 20,775 |
+| 6 | LSTM L4 | LSTM quantile head + CQR | 90.3% | 13,507 | 20,769 |
 | 6 | ridge | split conformal (absolute) | 89.2% | 12,446 | 20,162 |
 | 6 | ridge | split conformal (scaled by anchor) | 88.5% | 12,040 | 19,937 |
 | 6 | ridge | rolling conformal (last 720 h of known errors) | 89.5% | 13,085 | 20,250 |
@@ -34,6 +38,8 @@ Calibration uses validation residuals only (or, for the rolling variant, errors 
 | 24 | LSTM L4 | split conformal (absolute) | 87.7% | 14,463 | 26,345 |
 | 24 | LSTM L4 | split conformal (scaled by anchor) | 87.1% | 14,299 | 26,316 |
 | 24 | LSTM L4 | rolling conformal (last 720 h of known errors) | 88.6% | 15,453 | 26,458 |
+| 24 | LSTM L4 | LSTM quantile head, raw 5%-95% | 86.8% | 14,524 | 24,830 |
+| 24 | LSTM L4 | LSTM quantile head + CQR | 87.8% | 14,935 | 24,720 |
 | 24 | ridge | split conformal (absolute) | 87.2% | 16,485 | 28,000 |
 | 24 | ridge | split conformal (scaled by anchor) | 87.3% | 16,562 | 28,020 |
 | 24 | ridge | rolling conformal (last 720 h of known errors) | 88.9% | 17,497 | 27,758 |
@@ -45,6 +51,8 @@ Calibration uses validation residuals only (or, for the rolling variant, errors 
 | 48 | LSTM L4 | split conformal (absolute) | 87.2% | 20,600 | 34,288 |
 | 48 | LSTM L4 | split conformal (scaled by anchor) | 87.2% | 20,488 | 34,071 |
 | 48 | LSTM L4 | rolling conformal (last 720 h of known errors) | 88.5% | 22,149 | 34,961 |
+| 48 | LSTM L4 | LSTM quantile head, raw 5%-95% | 87.1% | 21,420 | 34,560 |
+| 48 | LSTM L4 | LSTM quantile head + CQR | 85.4% | 20,638 | 34,850 |
 | 48 | ridge | split conformal (absolute) | 85.9% | 20,372 | 36,449 |
 | 48 | ridge | split conformal (scaled by anchor) | 85.1% | 19,845 | 36,151 |
 | 48 | ridge | rolling conformal (last 720 h of known errors) | 87.6% | 22,899 | 36,752 |
