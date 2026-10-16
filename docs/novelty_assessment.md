@@ -35,7 +35,7 @@
 ## What this project's contribution can honestly be, given the above and our results
 Each ingredient exists somewhere in the literature; the combination for all-India hourly demand was not found. The contribution is therefore best framed as a careful **empirical benchmark and negative/null-result study**, not as a new method:
 - a strictly chronological protocol with a frozen configuration and a single test run (reproduced exactly), including paired block-bootstrap comparisons;
-- evidence that, on this dataset, XGBoost is as good as or better than an LSTM at 6-48 h and that ridge is hard to beat at 1 h; the LSTM is not data-limited within 2.3 years;
+- evidence that, on this dataset, XGBoost is as good as or better than an LSTM at 6-48 h and that ridge is hard to beat at 1 h; the LSTM does not close the gap to XGBoost as the training set grows from 12 months to 2.3 years (its error is flat at 1, 24 and 48 h and falls at a similar pace to XGBoost's at 6 h);
 - evidence about which inputs matter: calendar features matter most; past weather, past solar/wind and festival indicators add little on the test year; perfect future weather would help at 24-48 h;
 - interval results (conformal and quantile methods) showing coverage degrades with horizon under distribution shift, and rolling calibration recovers part of it;
 - computational-cost logging.
