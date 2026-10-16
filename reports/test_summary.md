@@ -39,6 +39,19 @@ Errors rise from validation to test at 6-48 h for every model (XGBoost +10%, +18
 - Holiday/festival features (S1 -> S2): 6 h 2,738 -> 2,705, 24 h 3,784 -> 3,705, 48 h 5,213 -> 5,157 MW, i.e. 1-2% gains, consistent in sign across horizons; no gain at 1 h. Error within one day of a major festival is clearly elevated: for XGBoost 1.3 to 1.7 times the overall error at 6-48 h (e.g. 24 h 6,214 MW vs 3,728 MW overall; not elevated at 1 h); n = 360 hours, about 15 days, so this is a small sample. At 48 h the LSTMs and ridge do much worse around festivals (9,000-10,100 MW, 1.7-1.9 times) than XGBoost (6,524 MW).
 - The LSTM per-seed spread is wide at 6 h (L1: 2,904-3,335 MW), i.e. the headline mean-of-seeds number hides large run-to-run variation.
 
+## Equal-budget LSTM (added 2026-10-16; declared in the protocol before it was run)
+The first LSTM tuning had 12 trials per horizon against about 90 for XGBoost. The LSTM L4 headline was therefore re-tuned with 90 trials per horizon in total (`reports/lstm_stage3.md`; selection on validation only), then evaluated once on the test period with the same fitting rule (`reports/lstm_stage3_test.md`).
+
+| Test MAE (MW) | 1 h | 6 h | 24 h | 48 h |
+|---|---:|---:|---:|---:|
+| LSTM L4, equal tuning budget | 1,549 | 3,151 | 3,776 | 5,418 |
+| LSTM L4, original (12 trials) | 1,643 | 3,170 | 3,743 | 5,325 |
+| XGBoost S4 | 1,111 | 2,747 | 3,728 | 5,158 |
+| Equal-budget minus original (95% CI) | -94 (-126 to -64) | -19 (-74 to +53) | +33 (-21 to +88) | +94 (-47 to +242) |
+| Equal-budget minus XGBoost (95% CI) | +438 (+300 to +532) | +404 (+310 to +506) | +47 (-63 to +128) | +260 (-55 to +563) |
+
+The extra tuning improved the LSTM only at 1 h (-6%); at 6 h, 24 h and 48 h the change is not distinguishable from zero, and the validation gains at 24 h and 48 h (-1% and -3%) did not carry over to the test year. The comparison with XGBoost is unchanged: the LSTM is clearly worse at 1 h and 6 h and not distinguishable from XGBoost at 24 h and 48 h. Caveats: 55 of the 78 new trials at 1 h were stopped early by the pruning rule (almost none at the other horizons), so the budget is equal in trial count but not in compute at 1 h; the selected configurations stop improving on validation after only 1 to 5 epochs at 6 h and 48 h, which suggests fast over-fitting to the 2021-2023 pattern.
+
 ## Caveats
 - 28.8% of test hours are at or above the training 95th percentile (demand has grown), so the "peak hours" subset is a large share of the test period and is not a rare-event measure.
 - Tuning budgets differ (XGBoost 90 trials per horizon; LSTM 12 + 12) and the LSTM was tuned for 10-epoch trials; any statement about "LSTM vs XGBoost" applies to this setup.
