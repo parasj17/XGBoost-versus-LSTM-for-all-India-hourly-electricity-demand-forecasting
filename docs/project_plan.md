@@ -65,7 +65,7 @@ Legend: `[x]` done · `[ ]` to do · `[~]` partly done (the row says what remain
 | 1.6 | Decide on regional/state festivals (see D-08); if yes, collect with citations | M | `[x]` deferred (D-08), then done as an exploratory extension 2026-10-16: state-level holidays from the `holidays` package (`reports/regional_holidays.md`); source incomplete and not checked against state gazettes; no benefit found |
 | 1.7 | Spot-check Zenodo per-state weather against Open-Meteo for one state and a few days | S | `[x]` 2026-10-14: Delhi daily mean temperature, 969 overlapping days: correlation 0.999, mean difference -0.19 C, MAE 0.31 C (0.22 C on a UTC day) — consistent with ERA5-derived data as assumed |
 | 1.8 | Investigate availability of **archived weather forecasts** for scenario C | M | `[x]` done 2026-10-13, see decision D-13 below |
-| 1.9 | Investigate any **solar/wind forecast** availability (otherwise G4 uses past values only) | S | `[ ]` not investigated; by design G4 uses past values only, so this was not needed for the frozen results |
+| 1.9 | Investigate any **solar/wind forecast** availability (otherwise G4 uses past values only) | S | `[x]` investigated 2026-10-16: no public archive of historical forecasts found; see `docs/data_availability_notes.md`; G4 uses past actuals only |
 
 **GATE 1:** all raw sources documented in `reports/dataset_inventory.md` and `references.md`; the three open questions (1.4, 1.5, D-08) are resolved or consciously deferred.
 
@@ -170,7 +170,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | 9.3 | Regional festivals / state holidays features | M | `[x]` population-weighted state-holiday features from the `holidays` package (`reports/regional_holidays.md`); no benefit on validation or test (`reports/extensions_xgb_test.md`); source incomplete for multi-day regional festivals |
 | 9.4 | Gridded (population-weighted) weather alternative | M | `[ ]` |
 | 9.5 | Longer horizons (72 h, 168 h) | M | `[ ]` |
-| 9.6 | EV features — only if reliable historical data is found | – | `[ ]` likely excluded |
+| 9.6 | EV features — only if reliable historical data is found | – | `[x]` closed as not feasible and not material (EV charging about 0.2% of 2024 consumption; no open hourly data); see `docs/data_availability_notes.md` |
 
 ## 12. Phase 10 — Novelty check and writing
 
