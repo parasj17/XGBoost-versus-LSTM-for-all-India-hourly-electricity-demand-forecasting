@@ -31,7 +31,7 @@ Sources: `reports/tables/baselines_validation.md`, `xgboost_validation.md`, `lst
 | Final/ablation fits | 144 fits in 16.6 min (4-15 s per fit for the headline set) | 36 fits in 75.0 min (32-277 s per fit for the headline set) |
 | Model size | 0.5-1.6 MB | 43-111 KB (10-27 thousand parameters) |
 | Peak working set | about 410 MB | about 730 MB |
-| Inference | 22-56 ms for 4,367 rows | 60-164 ms for 1,024 windows (roughly 11 to 20 times more per sample) |
+| Inference | 22-56 ms for 4,367 rows | 60-164 ms for 1,024 windows (about 10 to 22 times more per row than these stage-1 XGBoost models, and 7 to 16 times more than the later stage-2 models; see `reports/efficiency_table.md`) |
 Single-sample latencies (XGBoost 12.6-13 ms, LSTM 1.2-1.9 ms) were measured through different Python interfaces and are dominated by overhead, so they are not comparable.
 
 ---

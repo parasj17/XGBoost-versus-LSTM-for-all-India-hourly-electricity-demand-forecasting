@@ -31,7 +31,7 @@ Time for the three seeds together, trees and epochs fixed, no early-stopping eva
 | 24 h | 16 | 60 | 0.004 | 0.058 |
 | 48 h | 24 | 83 | 0.006 | 0.081 |
 
-Batch latency per row is the comparable figure (LSTM 7-16 times higher per row than the stage-2 XGBoost models; the earlier figure of 11-20 times in `reports/validation_summary.md` compared against the smaller stage-1 XGBoost models; the LSTM figure includes the sliding-window construction). Single-row latencies were measured through different Python interfaces and are dominated by overhead, so they are not tabulated.
+Batch latency per row is the comparable figure (LSTM 7-16 times higher per row than the stage-2 XGBoost models; against the stage-1 XGBoost models of `reports/validation_summary.md` (fewer trees, S4 inference 23-56 ms per batch) the ratio is 10-22 times; the LSTM figure includes the sliding-window construction). Single-row latencies were measured through different Python interfaces and are dominated by overhead, so they are not tabulated.
 
 ## 4. Tuning budget
 
