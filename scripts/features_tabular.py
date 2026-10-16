@@ -26,6 +26,7 @@ WEATHER = ["temp_c", "rel_humidity_pct", "dew_point_c", "precip_mm", "wind_speed
 REGIONAL_T = ["temp_c_n", "temp_c_w", "temp_c_s", "temp_c_e", "temp_c_ne"]
 REGIONAL = ROOT / "data" / "processed" / "regional_holiday_daily.csv"
 FORECAST = ROOT / "data" / "interim" / "forecast_weather_national.csv"
+FORECAST_LONG = ROOT / "data" / "interim" / "forecast_temp_long_national.csv"   # leads of 3 and 7 days (temperature only)
 # The archive holds only temperature for the whole period; all other variables are empty before about 2024-02 (checked 2026-10-15), so only temperature is used.
 WEATHER_FC = ["temperature_2m"]
 # extension feature sets (protocol deviation log 2026-10-15); kept apart so that existing runs are unchanged
@@ -116,8 +117,12 @@ def build_features(df: pd.DataFrame, h: int, groups, relative: bool) -> pd.DataF
         for c, name in (("share_public", "reg_share_public_T"), ("share_regional_only", "reg_share_only_T"), ("d_next_reg", "reg_d_next"), ("d_since_reg", "reg_d_since")):
             X[name] = reg[c].reindex(td).to_numpy()
     if "g3f" in groups:                                   # archived NWP forecast for the target hour (scenario C); gaps stay NaN
-        fc = pd.read_csv(FORECAST, parse_dates=["timestamp"]).set_index("timestamp")
-        lead = "f2" if h > 24 else "f1"                   # previous_day2 for 48 h, previous_day1 otherwise
+        if h > 48:                                        # long horizons: previous_day3 for 72 h, previous_day7 for 168 h
+            fc = pd.read_csv(FORECAST_LONG, parse_dates=["timestamp"]).set_index("timestamp")
+            lead = "f3" if h <= 72 else "f7"
+        else:
+            fc = pd.read_csv(FORECAST, parse_dates=["timestamp"]).set_index("timestamp")
+            lead = "f2" if h > 24 else "f1"               # previous_day2 for 48 h, previous_day1 otherwise
         for v in WEATHER_FC:
             X[f"fc_{v}_T"] = fc[f"{lead}_{v}"].reindex(T).to_numpy()
         X["fc_temp_minus_now"] = X["fc_temperature_2m_T"] - df["temp_c"].to_numpy()
