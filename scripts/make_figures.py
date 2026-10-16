@@ -1,5 +1,5 @@
 """Figures for the write-up, generated from the saved test-period predictions (data/interim/predictions) and the result tables.
-Colour-blind-safe palette (Okabe-Ito). Output: reports/figures/fig*.png and fig*.pdf.
+Colour-blind-safe palette (Okabe-Ito). Output: reports/figures/fig*.png.
 Usage: py -I scripts/make_figures.py
 """
 from pathlib import Path
@@ -46,7 +46,6 @@ def boot(d, block=168, B=1000):
 
 def save(fig, name):
     fig.savefig(OUT / f"{name}.png", dpi=200)
-    fig.savefig(OUT / f"{name}.pdf")
     plt.close(fig)
     print("wrote", name)
 
