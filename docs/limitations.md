@@ -6,7 +6,7 @@ This list is meant to be read before any number is quoted. It is repeated, in sh
 - The hourly dataset covers 2021-09-01 to 2025-06-24 (about 3.8 years). After about 2.3 years for training and half a year for validation, the test period is **one year** (2024-07-01 to 2025-06-24).
 - The confidence intervals in the reports describe hour-to-hour sampling noise inside that year. They do **not** describe year-to-year variation, so they understate the uncertainty about how the models would rank in another year.
 - Each season appears once in the test year; festivals appear in only a few days (about 15 days within one day of a major festival).
-- Partial remedies, none of which removes the limitation: two extra rolling-origin folds on 2023, a walk-forward evaluation over 2024-25 (whose first two quarters lie in the validation period and are not independent), and a separate daily study on a different dataset.
+- Partial remedies, none of which removes the limitation: two extra rolling-origin folds on 2023, a walk-forward evaluation over 2024-25 (whose first two quarters lie in the validation period and are not independent), and a daily multi-year walk-forward on the Zenodo national daily series with eight test years (2017-2024; daily resolution and two horizons only, hyper-parameters tuned on two of the years, one year is the COVID shock). The hourly results still rest on one test year.
 
 ## 2. Validation numbers are optimistic
 - The validation period (2024-H1) was used for hyper-parameter tuning, early stopping, model selection and conformal calibration. Validation results are therefore better than what an unseen period gives. The test numbers are the honest ones, and they are indeed higher for the models tuned on validation.

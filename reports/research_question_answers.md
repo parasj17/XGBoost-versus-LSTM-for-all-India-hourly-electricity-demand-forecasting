@@ -51,9 +51,22 @@ Models retrained every quarter on all earlier data with the frozen hyper-paramet
 
 With regular retraining XGBoost beat ridge in every window at 6 h and 24 h and in five of six at 48 h; at 1 h ridge was ahead in four of six windows (mean difference +47 MW in ridge's favour over the four windows from 2024-Q3), so the 1 h question stays unsettled. The LSTM was ahead of XGBoost in at most one window per horizon; at 24 h the two are close on average (+66 MW for the LSTM) and the equal-budget LSTM is no better than the original. These windows are not independent evaluations of an untouched period, and there are only six of them.
 
+## Daily multi-year walk-forward on the full Zenodo series, 2017-2024 (exploratory; `reports/daily_multiyear.md`)
+The Zenodo national daily energy (2013 to 2024-04) is daily, so it cannot answer the hourly questions, but it allows eight test years with an expanding training window (hyper-parameters chosen once on 2021-2022 and frozen; an LSTM was added). Mean MAE over the folds (MU) and wins (of 8 folds):
+
+| | naive | ridge | XGBoost | LSTM | XGBoost better than ridge | LSTM better than XGBoost |
+|---|---:|---:|---:|---:|---:|---:|
+| 1 day, all 8 folds | 138.7 | 50.7 | 52.0 | 51.5 | 3 | 6 |
+| 1 day, 5 clean folds | 132.4 | 48.8 | 48.8 | 49.7 | | |
+| 7 days, all 8 folds | 137.9 | 129.2 | 125.2 | 127.7 | 6 | 3 |
+| 7 days, 5 clean folds | 133.1 | 118.0 | 114.8 | 119.8 | | |
+
+"Clean" excludes 2021 and 2022 (the tuning period) and 2020 (COVID). At daily resolution and with up to 11 years of training data no model is consistently best: at 1 day the three learned models are within about 4% of each other and the winner changes from year to year (ridge 2017, 2019 and 2020; LSTM 2018, 2021, 2022 and 2023; XGBoost 2024); at 7 days XGBoost has a small edge (about 3% over ridge and 5% over the LSTM on the clean folds). In the COVID year ridge was clearly best at 1 day (57.0 MU against 69.7 for XGBoost and 66.8 for the LSTM), and at 7 days ridge (169.8) and XGBoost (163.2) were worse than the naive baseline (155.2) while the LSTM (155.8) only matched it. The LSTM was behind XGBoost in all three folds with at most 1,600 training days at 7 days, which is weak evidence of data hunger at small sizes, but it was not consistently behind at 1 day (ahead in 2018 and 2019). Eight test years give a better view of year-to-year variation than the single hourly test year, but they are daily, national, two horizons only, with hyper-parameters tuned on two of the years.
+
 ## Extensions that were run (exploratory, declared in advance, secondary to the frozen headline results)
 - **Scenario C (forecast temperature) and regional holidays:** see questions 1 and 2 above.
 - **LSTM uncertainty:** quantile head, see question 4.
+- **Daily multi-year walk-forward:** see the section above.
 - **Regional daily study** (Zenodo state-level daily energy, 2013 to 2024-04, test 2023-01-01 to 2024-04-28, evaluated once; `reports/regional_daily_study_test.md`): forecasting by region and summing did **not** beat forecasting the national total directly. Test MAE (MU), 1 day: naive 182.4, ridge 58.1, XGBoost direct 61.0, XGBoost bottom-up 72.0 (bottom-up minus direct +11.1, CI +1.9 to +17.9); 7 days: naive 181.0, ridge 164.6, direct 164.0, bottom-up 168.0 (bottom-up minus direct +4.1, CI -12.0 to +14.7). Bottom-up had looked better on validation (45.3 vs 49.9 MU at 1 day), which did not carry over. At 1 day ridge and XGBoost direct are not distinguishable (+2.8 MU, CI -3.3 to +10.3). Regional models reused the hyper-parameters tuned for the national series and there was a single 16-month test window, so read this as 'not supported', not as disproved.
 - **Novelty check:** see `docs/novelty_assessment.md` (preliminary web search; no study found that combines the elements, which is not proof that none exists).
 

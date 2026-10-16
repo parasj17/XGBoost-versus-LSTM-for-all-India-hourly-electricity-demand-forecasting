@@ -166,7 +166,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | # | Task | Size | Status |
 |---|---|---|---|
 | 9.1 | Uncertainty: XGBoost quantile regression and split/adaptive conformal intervals; LSTM quantile head or MC dropout; PICP, width, pinball loss | L | `[x]` split, anchor-scaled and rolling conformal (XGBoost, LSTM, ridge), XGBoost quantile regression + CQR, LSTM quantile head + CQR (`reports/uncertainty.md`); interval score used instead of pinball loss; MC dropout not run |
-| 9.2 | Daily regional study with Zenodo state data (regional forecasts → India total) as a separate experiment | L | `[x]` single test run 2026-10-16: bottom-up (sum of five regional XGBoost models) did not beat the direct national model (`reports/regional_daily_study_test.md`) |
+| 9.2 | Daily regional study with Zenodo state data (regional forecasts → India total) as a separate experiment | L | `[x]` single test run 2026-10-16: bottom-up (sum of five regional XGBoost models) did not beat the direct national model (`reports/regional_daily_study_test.md`) ; multi-year daily walk-forward 2017-2024 with an LSTM added done 2026-10-16 (`reports/daily_multiyear.md`) |
 | 9.3 | Regional festivals / state holidays features | M | `[x]` population-weighted state-holiday features from the `holidays` package (`reports/regional_holidays.md`); no benefit on validation or test (`reports/extensions_xgb_test.md`); source incomplete for multi-day regional festivals |
 | 9.4 | Gridded (population-weighted) weather alternative | M | `[ ]` |
 | 9.5 | Longer horizons (72 h, 168 h) | M | `[ ]` |
