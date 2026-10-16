@@ -1,0 +1,42 @@
+{
+ "72": {
+  "S0_history|0": 465,
+  "S0_history|1": 481,
+  "S0_history|2": 466,
+  "S1_calendar|0": 193,
+  "S1_calendar|1": 186,
+  "S1_calendar|2": 177,
+  "S2_holidays|0": 110,
+  "S2_holidays|1": 128,
+  "S2_holidays|2": 138,
+  "S3_weatherA|0": 142,
+  "S3_weatherA|1": 346,
+  "S3_weatherA|2": 161,
+  "S4_full_A|0": 272,
+  "S4_full_A|1": 419,
+  "S4_full_A|2": 439,
+  "S5_oracle_B|0": 643,
+  "S5_oracle_B|1": 698,
+  "S5_oracle_B|2": 561
+ },
+ "168": {
+  "S0_history|0": 15,
+  "S0_history|1": 10,
+  "S0_history|2": 9,
+  "S1_calendar|0": 8,
+  "S1_calendar|1": 8,
+  "S1_calendar|2": 8,
+  "S2_holidays|0": 2,
+  "S2_holidays|1": 1,
+  "S2_holidays|2": 1,
+  "S3_weatherA|0": 4,
+  "S3_weatherA|1": 2,
+  "S3_weatherA|2": 6,
+  "S4_full_A|0": 2,
+  "S4_full_A|1": 2,
+  "S4_full_A|2": 2,
+  "S5_oracle_B|0": 2,
+  "S5_oracle_B|1": 1,
+  "S5_oracle_B|2": 2
+ }
+}
