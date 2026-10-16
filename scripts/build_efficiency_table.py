@@ -44,7 +44,7 @@ for h in H:
     xb, lb = mi(x_fit[h], "batch_ms_median"), mi(l_fit[h], "batch_ms_median")
     md.append(f"| {h} h | {xb:.0f} | {lb:.0f} | {xb / 4367:.3f} | {lb / 1024:.3f} |")
 rat = [(mi(l_fit[h], "batch_ms_median") / 1024) / (mi(x_fit[h], "batch_ms_median") / 4367) for h in H]
-md += ["", f"Batch latency per row is the comparable figure (LSTM {min(rat):.0f}-{max(rat):.0f} times higher per row than the stage-2 XGBoost models; against the stage-1 XGBoost models of `reports/validation_summary.md` (fewer trees, S4 inference 23-56 ms per batch) the ratio is 10-22 times; the LSTM figure includes the sliding-window construction). Single-row latencies were measured through different Python interfaces and are dominated by overhead, so they are not tabulated.", ""]
+md += ["", f"Batch latency per row is the comparable figure (LSTM {min(rat):.0f}-{max(rat):.0f} times higher per row than the stage-2 XGBoost models; against the stage-1 XGBoost models of `reports/validation_summary.md` (S4 inference 23-56 ms per batch) the ratio is 10-22 times; the LSTM figure includes the sliding-window construction). Single-row latencies were measured through different Python interfaces and are dominated by overhead, so they are not tabulated.", ""]
 xt = [r for r in xw if r["stage"] == "tuning_trial"]
 lt = [r for r in lv if r["stage"] == "tuning_trial"]
 l3 = [r for r in jl("lstm_stage3.jsonl") if r["stage"] == "tuning_trial"]
