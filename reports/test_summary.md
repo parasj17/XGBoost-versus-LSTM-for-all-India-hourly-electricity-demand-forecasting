@@ -56,4 +56,4 @@ The extra tuning improved the LSTM only at 1 h (-6%); at 6 h, 24 h and 48 h the 
 - 28.8% of test hours are at or above the training 95th percentile (demand has grown), so the "peak hours" subset is a large share of the test period and is not a rare-event measure.
 - Tuning budgets differ (XGBoost 90 trials per horizon; LSTM 12 + 12) and the LSTM was tuned for 10-epoch trials; any statement about "LSTM vs XGBoost" applies to this setup.
 - One test year, one hardware setup, one train/validation/test split; rolling-origin folds on 2023 are in `reports/rolling_origin.md` (the XGBoost-vs-ridge ranking at 6 h flips between folds).
-- Refit times (3 seeds, laptop CPU) were 5-62 s for XGBoost S4 and 35-522 s for LSTM L4 (L1: 113-953 s); LSTM refits cost roughly 4 to 45 times more depending on horizon and variant.
+- Refit times (3 seeds, laptop CPU) were 5-62 s for XGBoost S4 and 35-522 s for LSTM L4 (L1: 113-953 s); LSTM refits cost roughly 4 to 46 times the XGBoost S4 refit of the same horizon (LSTM L4 4-8 times, L1 9-46 times).
