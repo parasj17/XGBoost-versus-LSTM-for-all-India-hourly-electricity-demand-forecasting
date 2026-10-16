@@ -228,7 +228,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 1. **Owner review** of `reports/test_summary.md`, `reports/research_question_answers.md` (now including the extensions) and `docs/novelty_assessment.md`. No frozen model or setting may be changed in response without logging a post-hoc deviation.
 2. **Phase 10:** a proper systematic literature search (Scopus / Web of Science / Google Scholar; queries and open points are listed in `docs/novelty_assessment.md`), then the write-up. Any "novel" claim must wait for that search.
 2b. **Figures: done 2026-10-16** (12 PNG figures, `scripts/make_figures.py`, captions in `reports/figures/FIGURE_CAPTIONS.md`); the consolidated efficiency table is `reports/efficiency_table.md`. Open for the owner: choose which figures go into the paper, and decide on a licence for the code.
-2c. **Parked pending the mentor:** the operational day-ahead model (task 9.7) and the derived day-wise view (task 9.8).
+2c. **Parked pending the mentor:** the operational day-ahead model (task 9.7) and the derived day-wise view (task 9.8). Also parked pending the mentor: the choice of a licence for the code (none added yet; the data licences are listed in the README).
 3. Remaining optional items (not done): MC dropout for the LSTM, forecast humidity/wind/radiation (not available in the archive before 2024), capacity-normalised solar/wind features, an LSTM in the daily regional study, a comparison with operational Grid-India forecasts if they can be obtained.
 4. Housekeeping: delete the temporary folders `D:\tmp_pip` and `D:\pylibs_verify` (outside the project); decide whether to keep `data/interim/predictions` (saved predictions, git-ignored).
 
