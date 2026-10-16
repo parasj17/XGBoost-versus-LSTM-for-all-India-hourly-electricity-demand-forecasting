@@ -21,8 +21,8 @@
 ## Part 2: interval triples quoted in the hand-written documents versus the generated reports
 
 - `reports/research_question_answers.md`: 34 distinct triples found, 34 matched a generated report, 0 not matched.
-- `reports/test_summary.md`: 24 distinct triples found, 16 matched a generated report, 8 not matched: -19.0 (-74.0 to 53.0); -94.0 (-126.0 to -64.0); 260.0 (-55.0 to 563.0); 33.0 (-21.0 to 88.0); 404.0 (310.0 to 506.0); 438.0 (300.0 to 532.0); 47.0 (-63.0 to 128.0); 94.0 (-47.0 to 242.0)
+- `reports/test_summary.md`: 24 distinct triples found, 24 matched a generated report, 0 not matched.
 - `reports/validation_summary.md`: 20 distinct triples found, 20 matched a generated report, 0 not matched.
 
-Total: 70 of 78 matched. Unmatched triples are not necessarily wrong (they may come from a differently formatted source) and must be checked by hand.
+Total: 78 of 78 matched. Unmatched triples are not necessarily wrong (they may come from a differently formatted source) and must be checked by hand.
 

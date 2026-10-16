@@ -11,7 +11,7 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 DOCS = ["reports/research_question_answers.md", "reports/test_summary.md", "reports/validation_summary.md"]
 SOURCES = ["reports/test_results.md", "reports/ablation_paired.md", "reports/extensions_xgb.md", "reports/extensions_xgb_test.md",
-           "reports/regional_daily_study_test.md", "reports/regional_daily_study.md"] + [str(p.relative_to(ROOT)) for p in (ROOT / "reports" / "tables").glob("*.md")]
+           "reports/regional_daily_study_test.md", "reports/regional_daily_study.md", "reports/lstm_stage3_test.md"] + [str(p.relative_to(ROOT)) for p in (ROOT / "reports" / "tables").glob("*.md")]
 N = r"([+-]?\d[\d,]*\.?\d*)"
 PATTERNS = [
     re.compile(N + r"(?: MW| MU)?,? ?\((?:95% block-bootstrap )?(?:CI )?" + N + r" to " + N),   # +62 (-14 to +202)  /  +11 MW (CI -3 to +22)
