@@ -1,0 +1,20 @@
+# Figure captions and caveats
+
+All figures are produced by `scripts/make_figures.py` from the saved test-period predictions (`data/interim/predictions`), the result tables in `reports/tables` and the generated reports. Colours: Okabe-Ito (colour-blind safe); the same colour always means the same model (blue ridge, orange XGBoost, green LSTM, grey best naive). Test period 2024-07-01 to 2025-06-24 unless stated. XGBoost = feature set S4, LSTM = L4 (full features), as in the frozen configuration.
+
+**General caveats.** One test year only. "Best naive" in figures 1, 2, 3, 6 and 7 is the naive baseline with the lowest MAE on the plotted period, not the one chosen on validation as in the tables (the two can differ at some horizons). 95% intervals are moving-block bootstrap intervals (168 h blocks) and ignore uncertainty from training and tuning; they are drawn in `make_figures.py` with a fixed seed, so they can differ by a few MW from the tabulated intervals, which come from the analysis scripts.
+
+| Figure | Caption | Specific caveats |
+|---|---|---|
+| fig01_mae_by_horizon | Test MAE of the best naive baseline, ridge, XGBoost and the LSTM at 1-168 h, with 95% block-bootstrap intervals (log scale). | Intervals for single models, not for differences; see fig03 for paired differences. |
+| fig02_skill_by_horizon | Reduction of test MAE relative to the best naive baseline, by horizon. | Skill shrinks towards 168 h; at 168 h the learned models are only a few percent better than naive. |
+| fig03_paired_differences | Paired MAE differences between models with 95% block-bootstrap intervals (negative: first model better); grey where the interval includes zero. | Not corrected for multiple comparisons. |
+| fig04_week_24h | 24 h-ahead forecasts against actual demand for one test week (3-9 March 2025). | One week chosen for legibility, not representative of errors; no selection by error size was made. |
+| fig05_feature_ablation | Change of XGBoost test MAE relative to the history-only set S0 as feature groups are added; dashed: oracle (observed) weather, an upper bound not available in practice. | Point values; paired intervals are in `reports/ablation_paired.md` and `reports/long_ablation_test.md`. Trees fixed from validation. |
+| fig06_walk_forward | Walk-forward evaluation: models refitted every quarter, MAE per test quarter (2024-Q1 and Q2 fall in the validation period). | Quarterly windows are small; one year of data; 72/168 h from `walk_forward_long`. |
+| fig07_daily_multiyear | MAE of daily total demand, 1-day and 7-day ahead, for 2017-2024, each year predicted from all earlier years (Zenodo all-India daily series). | A different, daily dataset; units MU (GWh per day); the year-to-year swings of all models (for example 2020 and 2023) were not investigated, so no cause is claimed. |
+| fig08_prediction_intervals | Coverage and mean width of 90% intervals around XGBoost forecasts, by horizon and method (split and rolling conformal, quantile regression raw and with conformal correction, CQR). | Calibrated on validation (rolling: on past errors); coverage below 90% at long horizons because the validation period was easier than the test year. |
+| fig09_training_cost | Training time of the final models (three seeds each for the learned models, fixed trees and epochs) at 1-48 h, log scale. | One laptop CPU, 4 threads; 72/168 h not logged comparably. |
+| fig10_learning_curves | Validation MAE against training-set size (12 months, 18 months, full) for XGBoost S4 and the LSTM. | Three sizes only; early stopping on validation for every size (mildly optimistic, same procedure for all); the LSTM variant is L1 at 1-48 h and L4 at 72/168 h, so the LSTM line is not the same model across panels. |
+| fig11_demand_and_splits | Daily mean demand with the training, validation and test periods shaded. | Shows the level shift between training and test, which affects all models. |
+| fig12_study_design | Overview of data, features, models, horizons, the three periods and the analyses. | Schematic. |

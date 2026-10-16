@@ -37,7 +37,7 @@ references.md        external sources
 ```powershell
 py -m pip install -r requirements.txt
 ```
-(`py` is the Python launcher on this machine.) PyTorch (CPU) is needed for the LSTM and is installed separately.
+(`py` is the Python launcher on this machine.) `requirements.txt` pins the exact versions used for all results (Python 3.14.3). PyTorch (CPU) is needed for the LSTM and is installed separately.
 
 ## Reproduce
 ```powershell
@@ -70,6 +70,16 @@ py scripts\build_regional_holiday_features.py              # state-level holiday
 py scripts\run_extensions_xgb.py [--with-test]             # forecast temperature and regional holidays
 py scripts\run_daily_regional_study.py [--with-test]       # Zenodo daily study (direct vs bottom-up)
 ```
+The 72 h and 168 h extension is run end to end (with commits between steps and automatic retries) by `py -I -u scripts\pipeline_runner.py scripts\chains\long_extensions.json`; its single scripts are `run_long_horizons.py`, `run_long_ablation.py`, `run_long_learning_curve.py`, `run_long_cv_tuning.py`, `run_long_lstm_tuning.py`, `run_long_intervals.py`, `run_extensions_xgb.py --long` and `analyze_long.py`.
+
+Figures, tables and audits (no model fitting; they read the saved predictions and logs):
+```powershell
+py -I scripts\make_figures.py                  # 12 figures -> reports/figures/fig01..fig12 (PNG)
+py -I scripts\build_efficiency_table.py        # reports/efficiency_table.md
+py -I scripts\audit_numbers.py ; py -I scripts\audit_ci_triples.py   # numbers audits
+```
+`make_figures.py` needs `data/interim/predictions` (regenerate with `run_test_evaluation.py --export`, which reproduces the first run exactly).
+
 Scripts use paths relative to the project root and have `--help` or a docstring.
 
 ## Key documents
@@ -77,6 +87,8 @@ Scripts use paths relative to the project root and have `--help` or a docstring.
 - `reports/validation_summary.md`, `reports/test_summary.md`, `reports/research_question_answers.md`: results.
 - `docs/novelty_assessment.md`: preliminary novelty check (web search only).
 - `reports/long_horizons_test.md`, `reports/long_ablation_test.md`, `reports/walk_forward_long.md`, `reports/rolling_origin_long.md`, `reports/long_learning_curve.md`, `reports/long_cv_tuning_test.md`, `reports/long_lstm_tuning_test.md`, `reports/long_extensions_xgb_test.md`, `reports/long_uncertainty.md`, `reports/long_breakdowns.md`, `reports/long_importance.md`: the 72 h and 168 h extension.
+- `reports/figures/fig01_...fig12_*.png`: the 12 figures for the write-up (accuracy and skill by horizon, paired differences, example week, feature ablation, walk-forward, daily multi-year, intervals, training cost, learning curves, demand and splits, study design); `reports/figures/FIGURE_CAPTIONS.md`: captions and caveats.
+- `reports/efficiency_table.md`: consolidated computational-efficiency table.
 - `reports/daily_multiyear.md`: daily multi-year walk-forward on the full Zenodo series (8 test years).
 - `reports/walk_forward.md`, `reports/lstm_stage3.md`, `reports/lstm_stage3_test.md`, `reports/numbers_audit.md`: walk-forward evaluation, equal-budget LSTM, numbers audit.
 - `reports/extensions_xgb_test.md`, `reports/regional_daily_study_test.md`, `reports/regional_holidays.md`: extension results.
