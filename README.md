@@ -76,6 +76,7 @@ Scripts use paths relative to the project root and have `--help` or a docstring.
 - `docs/project_plan.md`, `docs/experiment_protocol.md`: plan, frozen protocol, deviations log.
 - `reports/validation_summary.md`, `reports/test_summary.md`, `reports/research_question_answers.md`: results.
 - `docs/novelty_assessment.md`: preliminary novelty check (web search only).
+- `reports/long_horizons_test.md`, `reports/long_ablation_test.md`, `reports/walk_forward_long.md`: the 72 h and 168 h extension.
 - `reports/daily_multiyear.md`: daily multi-year walk-forward on the full Zenodo series (8 test years).
 - `reports/walk_forward.md`, `reports/lstm_stage3.md`, `reports/lstm_stage3_test.md`, `reports/numbers_audit.md`: walk-forward evaluation, equal-budget LSTM, numbers audit.
 - `reports/extensions_xgb_test.md`, `reports/regional_daily_study_test.md`, `reports/regional_holidays.md`: extension results.

@@ -54,6 +54,9 @@ Models retrained every quarter on all earlier data with the frozen hyper-paramet
 
 With regular retraining XGBoost beat ridge in every window at 6 h and 24 h and in five of six at 48 h; at 1 h ridge was ahead in four of six windows (mean difference +47 MW in ridge's favour over the four windows from 2024-Q3), so the 1 h question stays unsettled. The LSTM was ahead of XGBoost in at most one window per horizon; at 24 h the two are close on average (+66 MW for the LSTM) and the equal-budget LSTM is no better than the original. These windows are not independent evaluations of an untouched period, and there are only six of them.
 
+### Walk-forward at 72 h and 168 h (extension; `reports/walk_forward_long.md`)
+The same quarterly retraining at the long horizons, with the long-horizon configurations and the same flags (the first two windows are in the validation period). Mean MAE over the four windows from 2024-Q3 (MW): 72 h: naive 7,539, ridge 6,239, XGBoost 5,913, LSTM 6,089 (XGBoost better than ridge in 5 of 6 windows; the LSTM better than XGBoost in 2 of 6); 168 h: naive 8,527, ridge 7,777, XGBoost 8,246, LSTM 8,198 (XGBoost better than ridge in 0 of 6 windows; the LSTM better than XGBoost in 3 of 6). A week ahead ridge was better than XGBoost in every window and the learned models were only about 3-4% better than the naive baseline, in line with the validation and test results at 168 h.
+
 ## Daily multi-year walk-forward on the full Zenodo series, 2017-2024 (exploratory; `reports/daily_multiyear.md`)
 The Zenodo national daily energy (2013 to 2024-04) is daily, so it cannot answer the hourly questions, but it allows eight test years with an expanding training window (hyper-parameters chosen once on 2021-2022 and frozen; an LSTM was added). Mean MAE over the folds (MU) and wins (of 8 folds):
 
