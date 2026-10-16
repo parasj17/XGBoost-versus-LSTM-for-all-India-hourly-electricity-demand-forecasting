@@ -146,7 +146,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 |---|---|---|---|
 | 7.1 | Sequence windowing with no cross-split leakage; scalers fit on train only | L | `[x]` `scripts/run_lstm.py` (168-step windows gathered on the fly; level channels standardised with training statistics; same valid samples as XGBoost, asserted) |
 | 7.2 | Architecture kept modest (one LSTM layer + small MLP head; single-output direct per horizon) | M | `[x]` hidden 32-64, 10-27 thousand parameters |
-| 7.3 | Limited hyper-parameter search with the same budget as XGBoost; multiple seeds (>= 3) | L | `[~]` 3 seeds done; budget NOT equal: 12 trials per horizon vs 30 for XGBoost (documented pre-results in the protocol deviation log); tuning cost reported instead |
+| 7.3 | Limited hyper-parameter search with the same budget as XGBoost; multiple seeds (>= 3) | L | `[x]` first tuning had 12 trials per horizon (documented); equal-budget re-tuning with 90 trials per horizon done 2026-10-16 (`reports/lstm_stage3.md`, test in `reports/lstm_stage3_test.md`); it did not change the conclusions; 70% of the 1 h trials were pruned early |
 | 7.4 | Same ablations as 6.4 | L | `[~]` L1 (history+calendar), L2 (+holidays), L4 (full, scenario A) done; oracle-weather scenario and group-wise ablation of weather vs solar/wind not run for the LSTM |
 | 7.5 | Log training/inference time, memory, parameters, hardware | S | `[x]` `reports/tables/lstm_validation.jsonl`; summary in `reports/validation_summary.md` |
 

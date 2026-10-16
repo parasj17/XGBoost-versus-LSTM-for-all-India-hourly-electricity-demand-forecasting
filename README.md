@@ -13,6 +13,7 @@ Research objective: forecast all-India hourly electricity demand 1, 6, 24 and 48
 | Ridge | 1,049 | 3,082 | 4,214 | 5,549 |
 | XGBoost (declared headline) | 1,111 | 2,747 | 3,728 | 5,158 |
 | LSTM full features (declared headline) | 1,643 | 3,170 | 3,743 | 5,325 |
+| LSTM full features, equal tuning budget (added later) | 1,549 | 3,151 | 3,776 | 5,418 |
 XGBoost is best from 6 h on (the LSTM is not distinguishable from it at 24-48 h); ridge and XGBoost tie at 1 h. Details, intervals and caveats: `reports/test_summary.md`, `reports/research_question_answers.md`.
 
 ## Data
