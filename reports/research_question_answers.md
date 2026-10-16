@@ -39,6 +39,18 @@ Test MAPE (1 / 6 / 24 / 48 h): XGBoost 0.57 / 1.43 / 1.95 / 2.70 %; ridge 0.54 /
 - **Likely reason (a hypothesis, supported by data shift):** installed solar capacity kept growing; 15.4% of test hours exceed the training maximum of solar generation (8.9% of validation hours) and mean test solar is 59% higher than in training. Wind stayed inside its training range. Features expressed as a share of installed capacity were not tried and might behave differently.
 - Data caveats: solar night-time offsets were set to zero using radiation, daytime offsets cannot be corrected, and only past generation (up to the forecast origin) is allowed as input, which is a different question from using forecast generation.
 
+## Walk-forward evaluation with quarterly retraining (exploratory; `reports/walk_forward.md`)
+Models retrained every quarter on all earlier data with the frozen hyper-parameters, scored on six quarterly windows from 2024-Q1 to 2025-Q2. **The first two windows lie in the validation period (not independent); the other four overlap the test period.** Mean MAE over the four windows from 2024-Q3 (MW) and the number of windows (of six) won:
+
+| Horizon | ridge | XGBoost | LSTM L4 | LSTM equal budget | XGBoost better than ridge | LSTM L4 better than XGBoost |
+|---|---:|---:|---:|---:|---:|---:|
+| 1 h | 1,041 | 1,089 | 1,288 | 1,344 | 2 of 6 | 1 of 6 |
+| 6 h | 3,100 | 2,673 | 2,999 | 3,139 | 6 of 6 | 0 of 6 |
+| 24 h | 4,227 | 3,688 | 3,754 | 3,758 | 6 of 6 | 1 of 6 |
+| 48 h | 5,565 | 5,036 | 5,300 | 5,345 | 5 of 6 | 1 of 6 |
+
+With regular retraining XGBoost beat ridge in every window at 6 h and 24 h and in five of six at 48 h; at 1 h ridge was ahead in four of six windows (mean difference +47 MW in ridge's favour over the four windows from 2024-Q3), so the 1 h question stays unsettled. The LSTM was ahead of XGBoost in at most one window per horizon; at 24 h the two are close on average (+66 MW for the LSTM) and the equal-budget LSTM is no better than the original. These windows are not independent evaluations of an untouched period, and there are only six of them.
+
 ## Extensions that were run (exploratory, declared in advance, secondary to the frozen headline results)
 - **Scenario C (forecast temperature) and regional holidays:** see questions 1 and 2 above.
 - **LSTM uncertainty:** quantile head, see question 4.
