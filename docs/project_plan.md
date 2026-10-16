@@ -169,7 +169,7 @@ Goal: `data/processed/india_hourly_canonical.csv` (columns as in `reports/data_d
 | 9.2 | Daily regional study with Zenodo state data (regional forecasts → India total) as a separate experiment | L | `[x]` single test run 2026-10-16: bottom-up (sum of five regional XGBoost models) did not beat the direct national model (`reports/regional_daily_study_test.md`) ; multi-year daily walk-forward 2017-2024 with an LSTM added done 2026-10-16 (`reports/daily_multiyear.md`) |
 | 9.3 | Regional festivals / state holidays features | M | `[x]` population-weighted state-holiday features from the `holidays` package (`reports/regional_holidays.md`); no benefit on validation or test (`reports/extensions_xgb_test.md`); source incomplete for multi-day regional festivals |
 | 9.4 | Gridded (population-weighted) weather alternative | M | `[x]` done 2026-10-16 with state-capital points (not true grids) weighted by Census-2011 population: no robust effect (validation null; test 1-2% better for XGBoost at 24-48 h with a sign that flips from validation; `reports/statepop_weather_test.md`) |
-| 9.5 | Longer horizons (72 h, 168 h) | M | `[ ]` |
+| 9.5 | Longer horizons (72 h, 168 h) | M | `[x]` done 2026-10-16 (validation tuning, one test run; `reports/long_horizons.md`, `reports/long_horizons_test.md`): 72 h XGBoost lowest but not distinguishable from ridge or the LSTM; 168 h ridge clearly best, XGBoost and LSTM only 3.6% better than naive |
 | 9.6 | EV features — only if reliable historical data is found | – | `[x]` closed as not feasible and not material (EV charging about 0.2% of 2024 consumption; no open hourly data); see `docs/data_availability_notes.md` |
 
 ## 12. Phase 10 — Novelty check and writing
