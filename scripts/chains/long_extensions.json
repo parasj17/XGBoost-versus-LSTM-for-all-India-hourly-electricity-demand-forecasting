@@ -1,0 +1,16 @@
+[
+ {"name": "learning_curve_long", "script": "run_long_learning_curve.py", "log": "lc_long.log", "done_files": ["reports/long_learning_curve.md"], "stall_min": 120},
+ {"name": "commit_rolling_lc", "commit": "Long-horizon rolling-origin and learning-curve results"},
+ {"name": "cv_tuning_validation", "script": "run_long_cv_tuning.py", "log": "cv_long.log", "done_files": ["reports/long_cv_tuning.md", "reports/tables/long_cv_config.json"], "stall_min": 120},
+ {"name": "lstm_tuning_validation", "script": "run_long_lstm_tuning.py", "log": "lstm_long.log", "done_files": ["reports/long_lstm_tuning.md", "reports/tables/long_lstm_eq_config.json"], "stall_min": 120},
+ {"name": "extensions_validation", "script": "run_extensions_xgb.py", "args": ["--long"], "log": "ext_long.log", "done_files": ["reports/long_extensions_xgb.md"]},
+ {"name": "commit_validation_phases", "commit": "Long-horizon validation phases: CV tuning, equal-budget LSTM, forecast temperature and regional holidays"},
+ {"name": "cv_tuning_test", "script": "run_long_cv_tuning.py", "args": ["--with-test"], "log": "cv_long_test.log", "done_files": ["reports/long_cv_tuning_test.md", "reports/tables/LONG_CV_TEST_DONE.lock"]},
+ {"name": "commit_cv_test", "commit": "CV-tuned long-horizon models: single test evaluation"},
+ {"name": "lstm_tuning_test", "script": "run_long_lstm_tuning.py", "args": ["--with-test"], "log": "lstm_long_test.log", "done_files": ["reports/long_lstm_tuning_test.md", "reports/tables/LONG_LSTM_TEST_DONE.lock"]},
+ {"name": "commit_lstm_test", "commit": "Equal-budget LSTM at the long horizons: single test evaluation"},
+ {"name": "extensions_test", "script": "run_extensions_xgb.py", "args": ["--long", "--with-test"], "log": "ext_long_test.log", "done_files": ["reports/long_extensions_xgb_test.md", "reports/tables/LONG_EXTENSIONS_TEST_DONE.lock"]},
+ {"name": "commit_extensions_test", "commit": "Forecast temperature and regional holidays at the long horizons: single test evaluation"},
+ {"name": "intervals_test", "script": "run_long_intervals.py", "log": "intervals_long.log", "done_files": ["reports/long_uncertainty.md", "reports/tables/LONG_INTERVALS_TEST_DONE.lock"], "stall_min": 120},
+ {"name": "commit_intervals", "commit": "Prediction intervals at the long horizons: single test evaluation"}
+]

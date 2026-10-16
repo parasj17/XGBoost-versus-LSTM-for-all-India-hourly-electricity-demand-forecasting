@@ -29,7 +29,11 @@ N_TRIALS = 30
 def main():
     ap = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     ap.add_argument("--with-test", action="store_true")
+    ap.add_argument("--smoke", action="store_true")
     args = ap.parse_args()
+    global N_TRIALS
+    if args.smoke:
+        N_TRIALS = 1
     commit, dirty = rb.git_state()
     if args.with_test:
         if LOCK.exists():
@@ -44,7 +48,7 @@ def main():
           f"Git commit `{(commit or 'n/a')[:10]}`. LSTM L4, {N_TRIALS} random trials per horizon in the widened space plus the original configuration re-evaluated; selection on validation only. MAE in MW.", ""]
     rng = np.random.default_rng(0)
     out_cfg = {}
-    for h in (72, 168):
+    for h in ((72,) if args.smoke else (72, 168)):
         b = rb.build(df, h)
         Xs = {n: rb.design(b, rel, full) for n, (rel, full) in
               {"g01_abs": (False, False), "g01_rel": (True, False), "full_abs": (False, True), "full_rel": (True, True)}.items()}
@@ -102,6 +106,9 @@ def main():
             md += [f"## Horizon {h} h", "", "| model | test MAE (MW) |", "|---|---:|", f"| LSTM L4, equal budget | {f(p)} |", f"| LSTM L4, original | {f(o)} |", f"| XGBoost S4 | {f(x)} |", f"| ridge | {f(r)} |", "",
                    f"Equal-budget minus original: {d1.mean():+,.0f} MW (95% CI {l1:+,.0f} to {h1:+,.0f}); equal-budget minus XGBoost: {d2.mean():+,.0f} MW (CI {l2:+,.0f} to {h2:+,.0f}).", ""]
             print(f"h={h} test: equal-budget LSTM {f(p)}; original {f(o)}; XGBoost {f(x)}", flush=True)
+    if args.smoke:
+        print("smoke finished (nothing written)")
+        return
     if args.with_test:
         (ROOT / "reports" / "long_lstm_tuning_test.md").write_text(chr(10).join(md) + chr(10), encoding="utf-8")
         LOCK.write_text(f"long-horizon LSTM test run completed at commit {commit}" + chr(10), encoding="utf-8")
