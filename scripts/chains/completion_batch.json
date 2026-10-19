@@ -3,9 +3,7 @@
  {"name": "lstm24_validation", "script": "run_dayahead_lstm24.py", "log": "dayahead_lstm24_val.log", "done_files": ["reports/tables/dayahead_lstm24_config.json", "reports/dayahead_lstm24_validation.md"], "stall_min": 150},
  {"name": "lightgbm_validation", "script": "run_lightgbm.py", "log": "lightgbm_val.log", "done_files": ["reports/tables/lightgbm_config.json", "reports/lightgbm_validation.md"], "stall_min": 150},
  {"name": "gru_validation", "script": "run_neural_families.py", "args": ["--model", "gru"], "log": "neural_gru_val.log", "done_files": ["reports/tables/neural_gru_config.json", "reports/neural_gru_validation.md"], "stall_min": 300},
- {"name": "tcn_validation", "script": "run_neural_families.py", "args": ["--model", "tcn"], "log": "neural_tcn_val.log", "done_files": ["reports/tables/neural_tcn_config.json", "reports/neural_tcn_validation.md"], "stall_min": 300},
- {"name": "transformer_validation", "script": "run_neural_families.py", "args": ["--model", "transformer"], "log": "neural_transformer_val.log", "done_files": ["reports/tables/neural_transformer_config.json", "reports/neural_transformer_validation.md"], "stall_min": 300},
- {"name": "commit_validation_phases", "commit": "Completion batch: validation phases (day-ahead completions, 24-output LSTM, LightGBM, GRU, TCN, Transformer)"},
+ {"name": "commit_validation_phases", "commit": "Completion batch: validation phases (day-ahead completions, 24-output LSTM, LightGBM, GRU)"},
  {"name": "ext_test", "script": "run_dayahead_ext.py", "args": ["--with-test"], "log": "dayahead_ext_test.log", "done_files": ["reports/dayahead_ext_test.md", "reports/tables/DAYAHEAD_EXT_TEST_DONE.lock"], "stall_min": 150},
  {"name": "commit_ext_test", "commit": "Day-ahead completions: single test evaluation"},
  {"name": "lstm24_test", "script": "run_dayahead_lstm24.py", "args": ["--with-test"], "log": "dayahead_lstm24_test.log", "done_files": ["reports/dayahead_lstm24_test.md", "reports/tables/DAYAHEAD_LSTM24_TEST_DONE.lock"], "stall_min": 150},
@@ -13,9 +11,5 @@
  {"name": "lightgbm_test", "script": "run_lightgbm.py", "args": ["--with-test"], "log": "lightgbm_test.log", "done_files": ["reports/lightgbm_test.md", "reports/tables/LIGHTGBM_TEST_DONE.lock"], "stall_min": 150},
  {"name": "commit_lightgbm_test", "commit": "LightGBM: single test evaluation"},
  {"name": "gru_test", "script": "run_neural_families.py", "args": ["--model", "gru", "--with-test"], "log": "neural_gru_test.log", "done_files": ["reports/neural_gru_test.md", "reports/tables/NEURAL_GRU_TEST_DONE.lock"], "stall_min": 300},
- {"name": "commit_gru_test", "commit": "GRU: single test evaluation"},
- {"name": "tcn_test", "script": "run_neural_families.py", "args": ["--model", "tcn", "--with-test"], "log": "neural_tcn_test.log", "done_files": ["reports/neural_tcn_test.md", "reports/tables/NEURAL_TCN_TEST_DONE.lock"], "stall_min": 300},
- {"name": "commit_tcn_test", "commit": "TCN: single test evaluation"},
- {"name": "transformer_test", "script": "run_neural_families.py", "args": ["--model", "transformer", "--with-test"], "log": "neural_transformer_test.log", "done_files": ["reports/neural_transformer_test.md", "reports/tables/NEURAL_TRANSFORMER_TEST_DONE.lock"], "stall_min": 300},
- {"name": "commit_transformer_test", "commit": "Transformer: single test evaluation"}
+ {"name": "commit_gru_test", "commit": "GRU: single test evaluation"}
 ]
