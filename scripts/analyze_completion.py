@@ -9,6 +9,7 @@ import argparse
 import importlib
 import json
 import sys
+import zlib
 from pathlib import Path
 
 import matplotlib
@@ -351,7 +352,7 @@ def section_b(sp):
             cells = []
             for rn in ("XGBoost S4", "LSTM L4", "ridge"):
                 d = e - np.abs(r["ref"][rn] - r["y"])
-                lo, hi = rb.block_ci(d, rng)
+                lo, hi = rb.block_ci(d, np.random.default_rng([SEED, h, zlib.crc32(nm.encode()), zlib.crc32(rn.encode())]))   # own seed per comparison: independent of the other models run
                 cells.append(f"{sg(d.mean())} ({sg(lo)} to {sg(hi)})")
                 res[f"{h}:{nm}:{rn}"] = (float(d.mean()), float(lo), float(hi))
             md.append(f"| {h} h | **{nm}** | {f0(e.mean())} | " + " | ".join(cells) + " |")
@@ -382,7 +383,7 @@ def figure_b(rows):
                 xs.append(j)
                 ys.append(np.mean(np.abs(allp[nm] - r["y"])))
         if xs:
-            ax.plot(xs, ys, "o-", color=col[nm], label=nm)
+            ax.plot(xs, ys, "o-" if len(xs) == len(hs) else "o", color=col[nm], label=nm + ("" if len(xs) == len(hs) else " (evaluated at some horizons only)"))
     ax.set_xticks(range(len(hs)), [f"{h} h" for h in hs])
     ax.set_yscale("log")
     ax.set_ylabel("MAE (MW, log scale)")

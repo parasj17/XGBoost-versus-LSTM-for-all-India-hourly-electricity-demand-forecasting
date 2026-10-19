@@ -7,27 +7,29 @@ LightGBM (S4, scenario A) at 1, 6, 24, 48, 72 and 168 h; the GRU (LSTM L4 inputs
 | 1 h | ridge (existing) | 1,049 | | | |
 | 1 h | XGBoost S4 (existing) | 1,111 | | | |
 | 1 h | LSTM L4 (existing) | 1,643 | | | |
-| 1 h | **LightGBM S4** | 1,160 | +50 (+24 to +89) | -483 (-598 to -319) | +112 (+19 to +260) |
+| 1 h | **LightGBM S4** | 1,160 | +50 (+21 to +87) | -483 (-594 to -302) | +112 (+19 to +277) |
+| 1 h | **GRU** | 1,660 | +549 (+442 to +658) | +17 (-23 to +66) | +611 (+539 to +698) |
 | 6 h | ridge (existing) | 3,082 | | | |
 | 6 h | XGBoost S4 (existing) | 2,747 | | | |
 | 6 h | LSTM L4 (existing) | 3,170 | | | |
-| 6 h | **LightGBM S4** | 2,880 | +133 (+82 to +184) | -290 (-388 to -179) | -202 (-300 to -86) |
+| 6 h | **LightGBM S4** | 2,880 | +133 (+83 to +189) | -290 (-388 to -179) | -202 (-305 to -84) |
 | 24 h | ridge (existing) | 4,214 | | | |
 | 24 h | XGBoost S4 (existing) | 3,728 | | | |
 | 24 h | LSTM L4 (existing) | 3,743 | | | |
-| 24 h | **LightGBM S4** | 3,700 | -28 (-94 to +20) | -43 (-130 to +67) | -514 (-648 to -401) |
+| 24 h | **LightGBM S4** | 3,700 | -28 (-98 to +23) | -43 (-132 to +71) | -514 (-652 to -394) |
+| 24 h | **GRU** | 3,742 | +14 (-96 to +97) | -1 (-45 to +44) | -472 (-591 to -376) |
 | 48 h | ridge (existing) | 5,549 | | | |
 | 48 h | XGBoost S4 (existing) | 5,158 | | | |
 | 48 h | LSTM L4 (existing) | 5,325 | | | |
-| 48 h | **LightGBM S4** | 5,067 | -91 (-219 to +64) | -257 (-489 to +8) | -481 (-700 to -266) |
+| 48 h | **LightGBM S4** | 5,067 | -91 (-229 to +56) | -257 (-503 to +7) | -481 (-705 to -273) |
 | 72 h | ridge (existing) | 6,244 | | | |
 | 72 h | XGBoost S4 (existing) | 6,018 | | | |
 | 72 h | LSTM L4 (existing) | 6,200 | | | |
-| 72 h | **LightGBM S4** | 6,026 | +8 (-159 to +200) | -174 (-521 to +218) | -217 (-504 to +34) |
+| 72 h | **LightGBM S4** | 6,026 | +8 (-178 to +203) | -174 (-522 to +225) | -217 (-502 to +33) |
 | 168 h | ridge (existing) | 7,743 | | | |
 | 168 h | XGBoost S4 (existing) | 8,173 | | | |
 | 168 h | LSTM L4 (existing) | 8,171 | | | |
-| 168 h | **LightGBM S4** | 8,081 | -93 (-280 to +97) | -90 (-315 to +180) | +338 (+67 to +728) |
+| 168 h | **LightGBM S4** | 8,081 | -93 (-283 to +91) | -90 (-316 to +172) | +338 (+60 to +738) |
 
 ## Caveats
 

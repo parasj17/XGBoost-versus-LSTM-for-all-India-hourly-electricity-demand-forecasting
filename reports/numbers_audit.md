@@ -24,10 +24,10 @@ Tables in README.md, reports/test_summary.md and reports/validation_summary.md w
 
 ## Part 2: interval triples quoted in the hand-written documents versus the generated reports
 
-- `reports/research_question_answers.md`: 89 distinct triples found, 89 matched a generated report, 0 not matched.
+- `reports/research_question_answers.md`: 99 distinct triples found, 99 matched a generated report, 0 not matched.
 - `reports/test_summary.md`: 24 distinct triples found, 24 matched a generated report, 0 not matched.
 - `reports/validation_summary.md`: 20 distinct triples found, 20 matched a generated report, 0 not matched.
 
-Total: 133 of 133 matched. Unmatched triples are not necessarily wrong (they may come from a differently formatted source) and must be checked by hand.
+Total: 143 of 143 matched. Unmatched triples are not necessarily wrong (they may come from a differently formatted source) and must be checked by hand.
 
 
