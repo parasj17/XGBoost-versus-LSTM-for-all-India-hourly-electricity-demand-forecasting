@@ -109,11 +109,11 @@ def section_a(sp, md_all):
         return tuple(map(float, np.percentile(s[idx_all].sum(axis=1) / cnt[idx_all].sum(axis=1), [2.5, 97.5])))
 
     ref_key = "xgb"
-    res = {"hourly": {}, "vs_xgb": {}, "vs_ridge": {}}
+    res = {"hourly": {}, "vs_xgb": {}, "vs_ridge": {}, "vs_lstm": {}}
     for k in keys:
         e = np.abs(P[k] - y)
         res["hourly"][k] = (float(e.mean()), *boot_hour(e), float(100 * np.mean(e / y)))
-        for rk, store in (("xgb", "vs_xgb"), ("ridge", "vs_ridge")):
+        for rk, store in (("xgb", "vs_xgb"), ("ridge", "vs_ridge"), ("lstm", "vs_lstm")):
             if k != rk:
                 d = e - np.abs(P[rk] - y)
                 res[store][k] = (float(d.mean()), *boot_hour(d))
@@ -128,12 +128,13 @@ def section_a(sp, md_all):
           f"Task: forecasts issued at 10:00 on day D-1 for the 24 hours of day D (`docs/experiment_protocol.md`, entries of 2026-10-19 and 2026-10-20). {int(ok.sum()):,} (day, hour) samples, {len(days)} complete days; all models are compared on the same samples. "
           + ("Single test evaluations with frozen configurations; tuning budgets differ between models (pooled XGBoost 30 trials, pooled LSTM 30, 24-output LSTM 30, LightGBM 30, GRU 12; ridge and the naive baselines are searched exhaustively or not tuned)." if sp == "test" else "Validation predictions: hyper-parameters and early stopping were chosen on this period, so the numbers are optimistic."),
           f"Intervals: 95% paired moving-block bootstrap over whole days (blocks of {BLOCK} days, {B:,} resamples).", "",
-          "## Hourly accuracy", "", "| model | MAE (MW) [95% CI] | MAPE % | vs XGBoost S4, pooled (MW, 95% CI) | vs ridge (MW, 95% CI) |", "|---|---:|---:|---|---|"]
+          "## Hourly accuracy", "", "| model | MAE (MW) [95% CI] | MAPE % | vs XGBoost S4, pooled (MW, 95% CI) | vs ridge (MW, 95% CI) | vs LSTM L4, pooled (MW, 95% CI) |", "|---|---:|---:|---|---|---|"]
     for k in sorted(keys, key=lambda k: res["hourly"][k][0]):
         h = res["hourly"][k]
         vx = res["vs_xgb"].get(k)
         vr = res["vs_ridge"].get(k)
-        md.append(f"| {M[k][0]} | {f0(h[0])} [{f0(h[1])}, {f0(h[2])}] | {h[3]:.2f} | " + (f"{sg(vx[0])} ({sg(vx[1])} to {sg(vx[2])})" if vx else "reference") + " | " + (f"{sg(vr[0])} ({sg(vr[1])} to {sg(vr[2])})" if vr else "reference") + " |")
+        vl = res["vs_lstm"].get(k)
+        md.append(f"| {M[k][0]} | {f0(h[0])} [{f0(h[1])}, {f0(h[2])}] | {h[3]:.2f} | " + (f"{sg(vx[0])} ({sg(vx[1])} to {sg(vx[2])})" if vx else "reference") + " | " + (f"{sg(vr[0])} ({sg(vr[1])} to {sg(vr[2])})" if vr else "reference") + " | " + (f"{sg(vl[0])} ({sg(vl[1])} to {sg(vl[2])})" if vl else "reference") + " |")
     md += ["", "Differences are model minus reference (negative = the model is better); an interval that includes zero is not distinguishable.", "", "## Daily energy, daily peak and peak hour", "",
            "| model | energy MAE (MU) | vs XGBoost S4, pooled (MU, 95% CI) | peak MAE (MW) | vs XGBoost S4, pooled (MW, 95% CI) | peak bias (MW) | peak hour within 1 h % |", "|---|---:|---|---:|---|---:|---:|"]
     for k in sorted(keys, key=lambda k: res["daily"][k]["energy"]):

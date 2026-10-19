@@ -5,16 +5,16 @@ Intervals: 95% paired moving-block bootstrap over whole days (blocks of 28 days,
 
 ## Hourly accuracy
 
-| model | MAE (MW) [95% CI] | MAPE % | vs XGBoost S4, pooled (MW, 95% CI) | vs ridge (MW, 95% CI) |
-|---|---:|---:|---|---|
-| XGBoost S4, pooled | 4,120 [3,474, 4,636] | 2.15 | reference | -706 (-1,459 to -175) |
-| LightGBM S4, pooled | 4,120 [3,486, 4,634] | 2.15 | +0 (-39 to +52) | -706 (-1,453 to -150) |
-| XGBoost S4, one model per hour | 4,290 [3,765, 4,781] | 2.24 | +170 (+81 to +341) | -536 (-1,149 to -53) |
-| LSTM L4, 24 outputs | 4,292 [3,619, 4,892] | 2.23 | +173 (+50 to +348) | -534 (-1,322 to +104) |
-| LSTM L1 (history + calendar), pooled | 4,338 [3,696, 4,878] | 2.27 | +218 (+127 to +361) | -488 (-1,239 to +125) |
-| LSTM L4, pooled | 4,634 [3,982, 5,193] | 2.41 | +514 (+307 to +809) | -192 (-997 to +467) |
-| Ridge | 4,826 [4,370, 5,441] | 2.54 | +706 (+175 to +1,459) | reference |
-| Best naive | 6,224 [5,551, 6,865] | 3.23 | +2,105 (+1,925 to +2,401) | +1,398 (+654 to +2,080) |
+| model | MAE (MW) [95% CI] | MAPE % | vs XGBoost S4, pooled (MW, 95% CI) | vs ridge (MW, 95% CI) | vs LSTM L4, pooled (MW, 95% CI) |
+|---|---:|---:|---|---|---|
+| XGBoost S4, pooled | 4,120 [3,474, 4,636] | 2.15 | reference | -706 (-1,459 to -175) | -514 (-809 to -307) |
+| LightGBM S4, pooled | 4,120 [3,486, 4,634] | 2.15 | +0 (-39 to +52) | -706 (-1,453 to -150) | -514 (-814 to -288) |
+| XGBoost S4, one model per hour | 4,290 [3,765, 4,781] | 2.24 | +170 (+81 to +341) | -536 (-1,149 to -53) | -344 (-613 to -92) |
+| LSTM L4, 24 outputs | 4,292 [3,619, 4,892] | 2.23 | +173 (+50 to +348) | -534 (-1,322 to +104) | -342 (-601 to -93) |
+| LSTM L1 (history + calendar), pooled | 4,338 [3,696, 4,878] | 2.27 | +218 (+127 to +361) | -488 (-1,239 to +125) | -296 (-544 to -95) |
+| LSTM L4, pooled | 4,634 [3,982, 5,193] | 2.41 | +514 (+307 to +809) | -192 (-997 to +467) | reference |
+| Ridge | 4,826 [4,370, 5,441] | 2.54 | +706 (+175 to +1,459) | reference | +192 (-467 to +997) |
+| Best naive | 6,224 [5,551, 6,865] | 3.23 | +2,105 (+1,925 to +2,401) | +1,398 (+654 to +2,080) | +1,590 (+1,336 to +1,858) |
 
 Differences are model minus reference (negative = the model is better); an interval that includes zero is not distinguishable.
 
