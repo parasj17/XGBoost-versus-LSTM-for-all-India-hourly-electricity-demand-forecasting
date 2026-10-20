@@ -89,6 +89,7 @@ Scripts use paths relative to the project root and have `--help` or a docstring.
 - `docs/project_plan.md`, `docs/experiment_protocol.md`: plan, frozen protocol, deviations log.
 - `reports/validation_summary.md`, `reports/test_summary.md`, `reports/research_question_answers.md`: results.
 - `docs/novelty_assessment.md`: preliminary novelty check (web search only).
+- `docs/paper_draft.md`: first draft of the paper (about 7,000 words; numbers checked by `scripts/check_draft_numbers.py` and the interval audit); `docs/paper_outline.md`: outline, key messages, figure shortlist and claims the paper may and may not make; `reports/results_summary.md`: every model on every task (`scripts/build_results_table.py`).
 - `reports/long_horizons_test.md`, `reports/long_ablation_test.md`, `reports/walk_forward_long.md`, `reports/rolling_origin_long.md`, `reports/long_learning_curve.md`, `reports/long_cv_tuning_test.md`, `reports/long_lstm_tuning_test.md`, `reports/long_extensions_xgb_test.md`, `reports/long_uncertainty.md`, `reports/long_breakdowns.md`, `reports/long_importance.md`: the 72 h and 168 h extension.
 - `reports/figures/fig01_...fig12_*.png`: the 12 figures for the write-up (accuracy and skill by horizon, paired differences, example week, feature ablation, walk-forward, daily multi-year, intervals, training cost, learning curves, demand and splits, study design); `reports/figures/FIGURE_CAPTIONS.md`: captions and caveats.
 - `reports/efficiency_table.md`: consolidated computational-efficiency table.
