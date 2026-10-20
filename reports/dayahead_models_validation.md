@@ -5,14 +5,17 @@ Intervals: 95% paired moving-block bootstrap over whole days (blocks of 28 days,
 
 ## Hourly accuracy
 
-| model | MAE (MW) [95% CI] | MAPE % | vs XGBoost S4, pooled (MW, 95% CI) | vs ridge (MW, 95% CI) |
-|---|---:|---:|---|---|
-| XGBoost S4, pooled | 3,585 [3,082, 4,085] | 1.84 | reference | -214 (-553 to +95) |
-| XGBoost S4, one model per hour | 3,643 [3,241, 4,138] | 1.87 | +58 (-33 to +211) | -156 (-424 to +171) |
-| LSTM L1 (history + calendar), pooled | 3,746 [3,207, 4,336] | 1.92 | +161 (+64 to +313) | -54 (-419 to +367) |
-| Ridge | 3,799 [3,501, 4,195] | 1.95 | +214 (-95 to +553) | reference |
-| LSTM L4, pooled | 3,867 [3,301, 4,468] | 1.98 | +283 (+122 to +515) | +68 (-365 to +540) |
-| Best naive | 5,536 [4,878, 6,224] | 2.84 | +1,951 (+1,715 to +2,222) | +1,737 (+1,273 to +2,225) |
+| model | MAE (MW) [95% CI] | MAPE % | vs XGBoost S4, pooled (MW, 95% CI) | vs ridge (MW, 95% CI) | vs LSTM L4, pooled (MW, 95% CI) |
+|---|---:|---:|---|---|---|
+| XGBoost S4, pooled | 3,585 [3,082, 4,085] | 1.84 | reference | -214 (-553 to +95) | -283 (-515 to -122) |
+| LightGBM S4, pooled | 3,601 [3,056, 4,087] | 1.84 | +16 (-53 to +49) | -198 (-567 to +78) | -266 (-523 to -137) |
+| XGBoost S4, one model per hour | 3,643 [3,241, 4,138] | 1.87 | +58 (-33 to +211) | -156 (-424 to +171) | -224 (-486 to +42) |
+| LSTM L4, 24 outputs | 3,670 [3,094, 4,146] | 1.87 | +85 (-90 to +159) | -130 (-523 to +82) | -198 (-528 to -62) |
+| GRU | 3,685 [3,077, 4,288] | 1.89 | +100 (-39 to +241) | -114 (-540 to +297) | -182 (-340 to -76) |
+| LSTM L1 (history + calendar), pooled | 3,746 [3,207, 4,336] | 1.92 | +161 (+64 to +313) | -54 (-419 to +367) | -122 (-362 to +99) |
+| Ridge | 3,799 [3,501, 4,195] | 1.95 | +214 (-95 to +553) | reference | -68 (-540 to +365) |
+| LSTM L4, pooled | 3,867 [3,301, 4,468] | 1.98 | +283 (+122 to +515) | +68 (-365 to +540) | reference |
+| Best naive | 5,536 [4,878, 6,224] | 2.84 | +1,951 (+1,715 to +2,222) | +1,737 (+1,273 to +2,225) | +1,669 (+1,322 to +2,015) |
 
 Differences are model minus reference (negative = the model is better); an interval that includes zero is not distinguishable.
 
@@ -22,7 +25,10 @@ Differences are model minus reference (negative = the model is better); an inter
 |---|---:|---|---:|---|---:|---:|
 | XGBoost S4, one model per hour | 68.2 | -1.0 (-5.5 to +4.5) | 3,604 | +79 (-264 to +439) | +903 | 82.9 |
 | XGBoost S4, pooled | 69.2 | reference | 3,526 | reference | +508 | 83.4 |
+| GRU | 69.3 | +0.1 (-3.8 to +3.3) | 3,490 | -36 (-400 to +213) | -49 | 84.0 |
 | LSTM L1 (history + calendar), pooled | 69.5 | +0.3 (-4.0 to +5.3) | 4,014 | +489 (+184 to +941) | -1,254 | 82.9 |
+| LightGBM S4, pooled | 70.4 | +1.2 (-1.2 to +2.1) | 3,559 | +33 (-122 to +124) | +295 | 84.5 |
+| LSTM L4, 24 outputs | 70.6 | +1.4 (-4.1 to +3.7) | 3,534 | +9 (-601 to +296) | +1,163 | 85.6 |
 | Ridge | 71.9 | +2.7 (-5.8 to +12.5) | 3,583 | +58 (-343 to +452) | +879 | 87.3 |
 | LSTM L4, pooled | 74.0 | +4.8 (+0.7 to +9.2) | 3,658 | +132 (-225 to +527) | -880 | 83.4 |
 | Best naive | 110.9 | +41.7 (+34.5 to +49.4) | 5,348 | +1,822 (+1,399 to +2,328) | +1,142 | 80.7 |
@@ -58,6 +64,6 @@ Calibrated on the validation period only (in this validation-mode run the calibr
 
 - 181 complete days from one validation period; intervals reflect day-to-day noise inside the period, not year-to-year variation. The test year has been used several times for declared analyses.
 - Scenario A (no forecast weather) except where labelled; the issue time and the availability of the 10:00 demand value are design assumptions.
-- XGBoost, LightGBM, the LSTMs, GRU, TCN and Transformer are pooled over the 24 target hours except where labelled (one model per hour; 24 outputs); tuning budgets differ (see above).
-- SARIMAX and Prophet are references with fixed specifications (refitted weekly, no tuning, no weather); Prophet has no yearly term and no conditioning on recent data, so a large error is expected.
+- XGBoost, LightGBM, the LSTMs and the GRU are pooled over the 24 target hours except where labelled (one model per hour; 24 outputs); tuning budgets differ (see above).
+- Statistical models (SARIMAX, Prophet) and convolutional or attention-based networks (TCN, Transformer) were not evaluated (dropped by the owner before any run).
 - S6 uses archived temperature forecasts whose issue times were not verified; S5 uses oracle weather and is an upper bound, not an achievable result.
