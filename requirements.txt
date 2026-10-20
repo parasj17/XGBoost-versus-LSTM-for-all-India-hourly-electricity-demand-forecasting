@@ -1,10 +1,14 @@
 # Versions used for every result in reports/ (Python 3.14.3, Windows 11, CPU only).
 pandas==3.0.1
 numpy==2.4.2
+scipy==1.18.1
+scikit-learn==1.9.0      # needed by the scikit-learn interface of XGBoost (XGBRegressor)
 openpyxl==3.1.5
 requests==2.32.5
 matplotlib==3.11.2
 xgboost==3.4.1
 psutil==7.2.2
 holidays==0.99
-torch==2.14.1   # CPU build, installed separately (see README)
+torch==2.14.1            # CPU build
+lightgbm==4.7.0          # only for scripts/run_lightgbm.py (the LightGBM results)
+# Not run for the reported results (dropped before any run; scripts kept): statsmodels, prophet (scripts/run_classical_dayahead.py)
