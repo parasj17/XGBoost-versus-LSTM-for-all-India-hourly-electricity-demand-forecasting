@@ -42,3 +42,19 @@ Batch latency per row is the comparable figure (LSTM 7-16 times higher per row t
 | LSTM L4 stage 3, widened space with pruning (equal-budget tuning) | 312 | 329.4 | 63.3 |
 
 The 72 h and 168 h extensions (`reports/long_*.md`) did not log per-fit time, memory and inference in a comparable form, so they are not part of this table. Timings depend on this machine and on the thread count (XGBoost 4 threads, PyTorch CPU); only the ratios are meant to transfer.
+
+## 5. Wall-clock cost of the completion batch (2026-10-19/20; compiled by hand from the run logs and the 'Run time' lines of the reports)
+
+Same laptop (4 threads, CPU only). Times are for whole tasks (all seeds, all trials) and were not measured per fit; several runs overlapped with other jobs (marked), so they are upper bounds and only the order of magnitude should be compared. The first four rows are the validation phase (tuning plus final fits), the last four the single test run (fixed trees or epochs, 3 seeds).
+
+| model and task | phase | wall-clock | note |
+|---|---|---:|---|
+| LightGBM S4, six horizons and the day-ahead task (30 trials each) | validation | 5 min | all seven tasks together |
+| LightGBM S4, same seven tasks, 3 seeds | test | 1.5 min | |
+| GRU, 1 h / 24 h / day-ahead (12 trials each) | validation | 74 / 41 / 50 min | the first 15 minutes overlapped with other jobs |
+| GRU, 1 h / 24 h / day-ahead, 3 seeds | test | 16 / 5 / 9 min | |
+| 24-output LSTM, day-ahead (30 trials) | validation / test | 9 min / 1.5 min | one network per day, 828 training windows |
+| Day-ahead completions: per-hour XGBoost (24 models x 30 trials), LSTM L1 (30 trials), ablation (6 sets), quantile model | validation | 126 min | overlapped with code tests, inflated |
+| the same, frozen configuration | test | 8 min | |
+
+For orientation, the LSTM L4 tuning of the main study took 53 min for 48 trials (about 66 s per trial) and the XGBoost tuning 43.5 min for 244 trials (section 4). The new neural families TCN and Transformer were not run (cost: measured 0.6-4.2 and 2.7-5.6 minutes per epoch before the amendment of 2026-10-20, see the protocol log).
