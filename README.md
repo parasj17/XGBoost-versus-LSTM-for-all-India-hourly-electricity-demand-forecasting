@@ -101,5 +101,8 @@ Scripts use paths relative to the project root and have `--help` or a docstring.
 - `reports/extensions_xgb_test.md`, `reports/regional_daily_study_test.md`, `reports/regional_holidays.md`: extension results.
 - `reports/test_results.md`: full test tables (paired comparisons, breakdowns); `reports/uncertainty.md`, `reports/rolling_origin.md`, `reports/hour_of_day.md`, `reports/robustness.md`, `reports/ablation_paired.md`, `reports/learning_curve.md`.
 
+## Licences
+The code (`scripts/`, `tests/`) is released under the MIT licence (`LICENSE`); the reports, figures and written text (`docs/`, `reports/`) under CC BY 4.0 (`LICENSE-DOCS.md`). Copyright (c) 2026 Paras Jadhav. The data keep their own licences (below).
+
 ## Data licences
 Mendeley dataset: CC BY 4.0 (cite DOI 10.17632/y58jknpgs8.2). Open-Meteo: free for non-commercial use with attribution. See `references.md`.
