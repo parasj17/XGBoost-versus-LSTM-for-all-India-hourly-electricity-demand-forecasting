@@ -23,7 +23,7 @@
 - `reports/research_question_answers.md`: 99 distinct triples found, 99 matched a generated report, 0 not matched.
 - `reports/test_summary.md`: 24 distinct triples found, 24 matched a generated report, 0 not matched.
 - `reports/validation_summary.md`: 20 distinct triples found, 20 matched a generated report, 0 not matched.
-- `docs/paper_draft.md`: 53 distinct triples found, 53 matched a generated report, 0 not matched.
+- `docs/paper_draft.md`: 56 distinct triples found, 56 matched a generated report, 0 not matched.
 
-Total: 196 of 196 matched. Unmatched triples are not necessarily wrong (they may come from a differently formatted source) and must be checked by hand.
+Total: 199 of 199 matched. Unmatched triples are not necessarily wrong (they may come from a differently formatted source) and must be checked by hand.
 
