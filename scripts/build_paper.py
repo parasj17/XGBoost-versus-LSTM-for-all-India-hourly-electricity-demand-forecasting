@@ -155,6 +155,9 @@ def main():
         if not src.exists():
             sys.exit("missing figure " + str(src))
         shutil.copy2(src, PAPER / "figures" / src.name)
+    for stale in (PAPER / "figures").glob("*.png"):               # figures that are no longer used by the draft
+        if stale.stem not in set(figs):
+            stale.unlink()
     (PAPER / "body.tex").write_text(body, encoding="utf-8")
     (PAPER / "abstract.tex").write_text(abstract + "\n", encoding="utf-8")
     (PAPER / "keywords.tex").write_text(inline(keywords) + "\n", encoding="utf-8")
