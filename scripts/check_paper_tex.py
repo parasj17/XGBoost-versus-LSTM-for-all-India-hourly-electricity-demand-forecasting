@@ -20,7 +20,7 @@ def expand(path):
 problems = 0
 bib = (PAPER / "references.bib").read_text(encoding="utf-8")
 keys = set(re.findall(r"^@\w+\{([^,]+),", bib, flags=re.M))
-for variant in ("ieee", "springer"):
+for variant in ("ieee", "ieee-conference", "springer"):
     full = expand(PAPER / variant / "main.tex")
     try:
         parse_text = "\n".join(ln for ln in full.splitlines() if not ln.lstrip().startswith("\\newenvironment"))   # float wrappers: valid LaTeX that the parser rejects
