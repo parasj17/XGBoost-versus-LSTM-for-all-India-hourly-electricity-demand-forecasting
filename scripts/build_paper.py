@@ -17,6 +17,9 @@ SPECIAL = {"&": r"\&", "%": r"\%", "$": r"\$", "#": r"\#", "_": r"\_", "{": r"\{
 UNI = {"\u2212": "$-$", "\u00d7": r"$\times$", "\u00e8": r"\`e", "\u00fc": r"\"u"}
 
 
+FIG_ORDER = []          # figure names in the order of the draft; filled in main() before the conversion
+
+
 class Inline:
     """Markdown inline text -> LaTeX, with placeholders for code, citations and references so that they are not escaped."""
     def __init__(self):
@@ -40,6 +43,7 @@ class Inline:
         s = re.sub(r"`([^`]+)`", self.code, s)
         s = re.sub(r"\s*\[(@[A-Za-z0-9_:\-]+(?:;\s*@[A-Za-z0-9_:\-]+)*)\]", self.cite, s)
         s = re.sub(r"Fig\.\s*\[#([A-Za-z0-9_]+)\]", lambda m: self.hold(r"Fig.~\ref{fig:" + m.group(1) + "}"), s)
+        s = re.sub(r"Fig\.\s*(\d+)", lambda m: self.hold(r"Fig.~\ref{fig:" + FIG_ORDER[int(m.group(1)) - 1] + "}"), s)       # "Fig. N" = the N-th figure of the draft
         s = "".join(SPECIAL.get(c, c) if c != "\\" else r"\textbackslash{}" for c in s)
         s = re.sub(r"\*\*(.+?)\*\*", r"\\textbf{\1}", s)
         s = re.sub(r"(?<![*\w])\*(?!\s)(.+?)(?<!\s)\*(?![*\w])", r"\\emph{\1}", s)
@@ -109,7 +113,13 @@ def convert(md):
         m = re.match(r"^!\[(.*)\]\((.+)\)\s*$", ln)
         if m:
             flush()
-            block, name = figure_tex(m.group(2), m.group(1)); out += block; figs.append(name); i += 1; continue
+            cap, j = m.group(1), i + 1
+            while j < len(lines) and lines[j].strip() == "":
+                j += 1
+            if j < len(lines) and re.match(r"^\*Fig\. \d+\. ", lines[j]):          # the visible caption line below the image is the caption of the figure
+                cap = re.sub(r"^\*Fig\. \d+\.\s*", "", lines[j].strip()).rstrip("*").strip()
+                i = j
+            block, name = figure_tex(m.group(2), cap); out += block; figs.append(name); i += 1; continue
         if ln.lstrip().startswith("|"):
             flush()
             tl = []
@@ -147,6 +157,7 @@ def main():
     body_md = md.split("## 1. Introduction", 1)[1]
     body_md = "## 1. Introduction" + body_md
     body_md = body_md.split("## References", 1)[0]
+    FIG_ORDER[:] = re.findall(r"^!\[.*\]\(\.\./reports/figures/([A-Za-z0-9_]+)\.png\)\s*$", body_md, flags=re.M)
     body, figs = convert(body_md)
     PAPER.mkdir(exist_ok=True)
     (PAPER / "figures").mkdir(exist_ok=True)
