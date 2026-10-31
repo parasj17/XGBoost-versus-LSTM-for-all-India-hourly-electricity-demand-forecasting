@@ -121,4 +121,4 @@ The pipeline was checked from a fresh clone in an empty folder with a new virtua
 The code (`scripts/`, `tests/`) is released under the MIT licence (`LICENSE`); the reports, figures and written text (`docs/`, `reports/`) under CC BY 4.0 (`LICENSE-DOCS.md`). Copyright (c) 2026 Paras Jadhav. The data keep their own licences (below).
 
 ## Data licences
-Mendeley dataset: CC BY 4.0 (cite DOI 10.17632/y58jknpgs8.2). Open-Meteo: free for non-commercial use with attribution. See `references.md`.
+Mendeley dataset: CC BY 4.0 (cite DOI 10.17632/y58jknpgs8.2). Open-Meteo: free for non-commercial use with attribution.
