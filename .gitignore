@@ -23,3 +23,8 @@ venv/
 .DS_Store
 Thumbs.db
 .vscode/
+
+# Manuscript (kept local only)
+paper/
+docs/paper_draft.md
+docs/paper_outline.md
